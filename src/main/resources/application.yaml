@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: springlog-repetitive-learning
+  profiles:
+    active: dev
+
+server:
+  port: 8080
