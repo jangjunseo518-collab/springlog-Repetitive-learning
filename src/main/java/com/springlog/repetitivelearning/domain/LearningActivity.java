@@ -2,9 +2,16 @@ package com.springlog.repetitivelearning.domain;
 
 import com.springlog.repetitivelearning.domain.type.ActivityCategory;
 import com.springlog.repetitivelearning.domain.type.Visibility;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +32,11 @@ public class LearningActivity extends BasicEntity {
   private Visibility visibility;
   @Column(nullable = false)
   private ActivityCategory category;
+
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(name = "activity_tags", joinColumns = @JoinColumn(name = "activity_id"))
+  @Column(name = "tag")
+  private Set<String> tags = new HashSet<>();
 
   // 카테고리 속성
   private String instructorName;
@@ -76,6 +88,50 @@ public class LearningActivity extends BasicEntity {
   public void changeToPrivate() {
     this.visibility = Visibility.PRIVATE;
   }
+
+
+
+  //========== tag 추가
+  public void addTag(String tag) {
+    if(tag == null || tag.isBlank()) {
+      throw new IllegalArgumentException("태그는 비워둘 수 없습니다.");
+    }
+    String normalized = tag.trim().toLowerCase();
+
+    if(normalized.length() > 20) {
+      throw new IllegalArgumentException("태그의 길이는 20자 이하만 가능합니다.");
+    }
+
+    if(tags.size() >= 10){
+      throw new IllegalArgumentException("태그는 10개까지만 추가할 수 있습니다.");
+    }
+
+    if(!normalized.matches("^[a-zA-Z가-힣0-9@#-]+$")) {
+      throw new IllegalArgumentException("한글,영문,숫자,@,#,-만 입력 가능합니다.");
+    }
+
+    this.tags.add(normalized);
+  }
+
+  //========= tag 제거
+  public boolean removeTag(String tag) {
+    if(tag == null || tag.isBlank()) {
+      return false;
+    }
+    return this.tags.remove(tag.trim().toLowerCase());
+  }
+
+  //========== tags 목록을 읽기 전용으로 변한
+  public Set<String> getTags() {
+    return Collections.unmodifiableSet(this.tags);
+  }
+
+  //========== tag 등록되어있는지 확인
+  public boolean hasTag(String tag) {
+    if(tag == null)return false;
+    return this.tags.contains(tag.trim().toLowerCase());
+  }
+
 
   //========== 카태고리별 전용 속성 정규화
 
