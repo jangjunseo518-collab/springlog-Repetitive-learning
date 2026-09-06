@@ -11,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.AccessLevel;
@@ -29,8 +30,10 @@ public class LearningActivity extends BasicEntity {
   @Column(nullable = false)
   private int minutes;
 
-  @Enumerated(EnumType.STRING)
-  private ActivityCategory activityCategory;
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(name = "activity_tags", joinColumns = @JoinColumn(name = "activity_id"))
+  @Column(name = "tag")
+  private Set<String>tags = new HashSet<>();
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
@@ -90,6 +93,55 @@ public class LearningActivity extends BasicEntity {
   public void changeToPrivate() {
     this.visibility = Visibility.PRIVATE;
   }
+
+
+  //========== 태그
+
+  //태그 추가
+  public void addTag(String tag) {
+    if(tag == null || tag.isBlank()) {
+      throw new IllegalArgumentException("태그를 입력 해주세요.");
+    }
+
+    String standardTag = tag.trim().toLowerCase();
+
+    if(!standardTag.matches("^[a-zA-Z가-힣0-9@#-]+$")) {
+      throw new IllegalArgumentException("한글,영문,숫자,@,#,-만 입력 가능합니다.");
+    }
+
+    if(standardTag.length() > 20) {
+      throw new IllegalArgumentException("태그는 20자 까지만 가능합니다.");
+    }
+
+    if(tags.size() >= 10) {
+      throw new IllegalArgumentException("태그는 최대 10개 까지만 추가할 수 있습니다.");
+    }
+
+    tags.add(standardTag);
+
+  }
+
+  // 태그가 이미 있는지 확인
+  public boolean existTag(String tag) {
+    if(tag == null || tag.isBlank()) {
+      return false;
+    }
+    return tags.contains(tag.trim().toLowerCase());
+  }
+
+  // 태그 삭제
+  public boolean removeTag(String tag) {
+    if(tag == null || tag.isBlank()) {
+      return false;
+    }
+    return tags.remove(tag.trim().toLowerCase());
+  }
+
+  public Set<String> getTags() {
+    return Collections.unmodifiableSet(tags);
+  }
+
+
 
   //========== 카태고리별 전용 속성 정규화
 
