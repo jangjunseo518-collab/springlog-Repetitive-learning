@@ -2,9 +2,17 @@ package com.springlog.repetitivelearning.domain;
 
 import com.springlog.repetitivelearning.domain.type.ActivityCategory;
 import com.springlog.repetitivelearning.domain.type.Visibility;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,9 +29,15 @@ public class LearningActivity extends BasicEntity {
   @Column(nullable = false)
   private int minutes;
 
+  @Enumerated(EnumType.STRING)
+  private ActivityCategory activityCategory;
+
   @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
   private Visibility visibility;
+
   @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
   private ActivityCategory category;
 
   // 카테고리 속성
