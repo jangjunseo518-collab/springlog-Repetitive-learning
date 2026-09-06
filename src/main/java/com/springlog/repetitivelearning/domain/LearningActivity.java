@@ -29,9 +29,6 @@ public class LearningActivity extends BasicEntity {
   @Column(nullable = false)
   private int minutes;
 
-  @Enumerated(EnumType.STRING)
-  private ActivityCategory activityCategory;
-
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private Visibility visibility;
