@@ -11,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.AccessLevel;
@@ -28,6 +29,11 @@ public class LearningActivity extends BasicEntity {
   private String title;
   @Column(nullable = false)
   private int minutes;
+
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(name ="activity_tags", joinColumns = @JoinColumn(name = "activity_id"))
+  @Column(name = "tag")
+  private Set<String>tags = new HashSet<>();
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
@@ -87,6 +93,53 @@ public class LearningActivity extends BasicEntity {
   public void changeToPrivate() {
     this.visibility = Visibility.PRIVATE;
   }
+
+
+  //========= tags
+
+  //태그 추가
+  public void addTag(String tag) {
+    if(tags.size() >= 10) {// 태그 추가 가능 여부 먼저 확인
+      throw new IllegalArgumentException("태그는 10개 까지 추가가 가능합니다.");
+    }
+    if(tag == null || tag.isBlank()) {//추가 가능하면 유효성 검증 1
+      throw new IllegalArgumentException("태그를 작성해주세요.");
+    }
+    String standardizedTags = tag.trim().toLowerCase();
+    // 휴효성 검증 후 정규화
+
+    if(!standardizedTags.matches("^[a-zA-Z가-힣0-9@#-]+$")) {// 정규화 후 유효성 검증
+      throw new IllegalArgumentException("한글, 영문,숫자,@,-만 입력이 가능합니다");
+    }
+
+    if(standardizedTags.length() > 20) {//유효한 값이면 글자 수 검증
+      throw new IllegalArgumentException("태그의 글자 수는 20자 까지 입력 가능합니다.");
+    }
+
+    tags.add(standardizedTags);
+  }
+
+  // 태그 제거
+  public boolean removeTag(String tag) {
+    if(tag == null || tag.isBlank()) {
+      return false;
+    }
+    return tags.remove(tag.trim().toLowerCase());
+  }
+
+  //특정 태그 존재여부 확인
+  public boolean hasTag(String tag) {
+    if(tag == null || tag.isBlank()) {
+      return false;
+    }
+    return tags.contains(tag.trim().toLowerCase());
+  }
+
+  // 읽기 전용으로 태그 목록 반환
+  public Set<String> getTags() {
+    return Collections.unmodifiableSet(tags);
+  }
+
 
   //========== 카태고리별 전용 속성 정규화
 
