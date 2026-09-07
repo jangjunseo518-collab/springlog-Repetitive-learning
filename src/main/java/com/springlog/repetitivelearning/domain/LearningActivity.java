@@ -11,13 +11,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.mapping.Collection;
 
-@Entity
 @Getter
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "activities")
 public class LearningActivity extends BasicEntity {
@@ -28,6 +30,11 @@ public class LearningActivity extends BasicEntity {
   @Column(nullable = false)
   private int minutes;
 
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(name = "activity_tags", joinColumns = @JoinColumn(name = "activity_id"))
+  @Column(name = "tag")
+  private Set<String> tags = new HashSet<>();
+
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private Visibility visibility;
@@ -35,55 +42,46 @@ public class LearningActivity extends BasicEntity {
   @Enumerated(EnumType.STRING)
   private ActivityCategory category;
 
-  @ElementCollection(fetch = FetchType.LAZY)
-  @CollectionTable(name = "activity_tags", joinColumns = @JoinColumn(name = "activity_id"))
-  @Column(name = "tag")
-  private Set<String> tags = new HashSet<>();
-
-  // 카테고리 별 속성
-  @Column(length = 20)
+  // 카테고리 전용 속성
   private String instructorName;
   private Integer completionRate;
-  @Column(length = 20)
   private String bookTitle;
 
-  public LearningActivity(String title, int minutes, Visibility visibility,
-      ActivityCategory category, String instructorName, Integer completionRate, String bookTitle) {
+  public LearningActivity(Visibility visibility, ActivityCategory category, String instructorName,
+      Integer completionRate, String bookTitle, String title, int minutes) {
     validateTitle(title);
     validateMinutes(minutes);
     this.title = title.trim();
-    this.minutes = minutes;
+    this.bookTitle = bookTitleNormalization(category, bookTitle);
     this.visibility = visibility;
     this.category = category;
     this.instructorName = instructorNameNormalization(category, instructorName);
-    this.completionRate = completionRateNormalization(completionRate);
-    this.bookTitle = bookTitleNormalization(category, bookTitle);
+    this.completionRate = completionRateNormalization(category, completionRate);
+    this.minutes = minutes;
   }
 
-// ========== 제목 & 학습 시간 ==========
-
-  // 제목 유효성 검증
+  // 제목, 학습시간 유효성 검증
   private static void validateTitle(String title) {
     if (title == null || title.isBlank()) {
-      throw new IllegalArgumentException("제목은 비워둘 수 없습니다.");
+      throw new IllegalArgumentException("제목을 입력해 주세요.");
     }
   }
-  // 학습 시간 유효성 검증
   private static void validateMinutes(int minutes) {
     if (minutes < 1) {
-      throw new IllegalArgumentException("학습 시간은 1분 이상이여야 합니다.");
+      throw new IllegalArgumentException("학습시간은 1분 이상이여야 합니다.");
     }
+
   }
 
+  //필수 필드 공통
   //제목 변경
   public void changeTitle(String title) {
     validateTitle(title);
     this.title = title.trim();
   }
-  // 학습 시간 변경
-  public void changeMinutes(int minutes) {
+  public void increaseMinutes(int minutes) {
     validateMinutes(minutes);
-    this.minutes = minutes;
+    this.minutes += minutes;
   }
 
   //공개 여부 변경
@@ -94,27 +92,32 @@ public class LearningActivity extends BasicEntity {
     this.visibility = Visibility.PRIVATE;
   }
 
-  // ========== 태그 ==========
+  // ========= 태그
 
-  //태그 저장
   public void addTag(String tag) {
-    if(tags.size() >= 10){
-      throw new IllegalArgumentException("태그는 10개까지 추가할 수 있습니다.");
-    }
-    String standardizedTag = tag.trim().toLowerCase();
-
-    if(standardizedTag.length() > 20) {
-      throw new IllegalArgumentException("태그의 길이는 20글자 까지 입력이 가능합니다.");
+    if(tags.size() >= 10) {
+      throw new IllegalArgumentException("태그는 최대 10개까지 추가 가능합니다.");
     }
 
-    if(standardizedTag.matches("^[a-zA-Z가-힣0-9@#-]+$")){
-      throw new IllegalArgumentException("태그는 한글,영문,숫자,#,@,-만 작성 가능합니다.");
+    String normalizationTag = tag.trim().toLowerCase();
+
+    if(normalizationTag.length() > 20) {
+      throw new IllegalArgumentException("태그는 20자까지 입력 가능합니다.");
     }
 
-    this.tags.add(standardizedTag);
+    if(!normalizationTag.matches("^[a-zA-Z가-힣0-9@#-]+$")) {
+      throw new IllegalArgumentException("태그는 한글,영문,숫자,#,@,-만 입력 가능합니다.");
+    }
+    tags.add(normalizationTag);
   }
 
-  // 특정 태그 존재 확인
+  public boolean removeTag(String tag) {
+    if(tag == null || tag.isBlank()) {
+      return false;
+    }
+   return tags.remove(tag.trim().toLowerCase());
+  }
+
   public boolean hasTag(String tag) {
     if(tag == null || tag.isBlank()) {
       return false;
@@ -122,31 +125,26 @@ public class LearningActivity extends BasicEntity {
     return tags.contains(tag.trim().toLowerCase());
   }
 
-  // 태그 제거
-  public void removeTag(String tag) {
-    if(tag == null || tag.isBlank()) {
-      return;
-    }
-    tags.remove(tag.trim().toLowerCase());
-  }
-
-  //읽기 전용 태그 목록 조회
   public Set<String> getTags() {
-    return Collections.unmodifiableSet(this.tags);
+    return Collections.unmodifiableSet(tags);
   }
 
 
-  // 카테고리 별 정규화
+
+  // ========== 카태고리 별 속성 정규화
   private static String instructorNameNormalization(ActivityCategory category, String instructorName) {
     if(category == ActivityCategory.LECTURE && (instructorName == null || instructorName.isBlank())) {
-      return "강사 미정";
+      return "강사미정";
     }
     return instructorName;
   }
 
-  private static Integer completionRateNormalization(Integer completionRate) {
+  private static Integer completionRateNormalization(ActivityCategory category, Integer completionRate) {
+    if(category != ActivityCategory.PRACTICE){
+      return null; //일관성을 위해 캍고리 검증
+    }
     if(completionRate == null) {
-      return null; // 강의나 독서 카테고리라면 빈 값이 들어갈지도? 일단 보류.
+      return null;
     }
     if(completionRate < 0) {
       return 0;
@@ -157,11 +155,10 @@ public class LearningActivity extends BasicEntity {
     return completionRate;
   }
 
-  private static String bookTitleNormalization(ActivityCategory category ,String bookTitle) {
+  private static String bookTitleNormalization(ActivityCategory category, String bookTitle) {
     if(category == ActivityCategory.READING && (bookTitle == null || bookTitle.isBlank())) {
       return "책 미정";
     }
     return bookTitle;
   }
-
 }
