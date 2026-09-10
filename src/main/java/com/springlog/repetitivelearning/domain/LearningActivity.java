@@ -25,6 +25,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LearningActivity extends BasicEntity {
 
+  //사용자
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "owner_id")
+  private User owner;
+
   // 공통 필드
   @Column(nullable = false)
   private String title;
@@ -100,13 +105,18 @@ public class LearningActivity extends BasicEntity {
 
   //태그 추가
   public void addTag(String tag) {
+    if(tag == null || tag.isBlank()) {// 유효성 null,빈값/공백
+      throw new IllegalArgumentException("태그를 입력해 주세요.");
+    }
+
     String standardizedTag = tag.trim().toLowerCase(); //정규화
+
+    if(tags.contains(standardizedTag)) {
+      return;
+    }
 
     if(tags.size() >= 10) {// 태그 추가 가능한지 먼저 검증
       throw new IllegalArgumentException("태그는 10개 까지 추가할 수 있습니다.");
-    }
-    if(tag == null || tag.isBlank()) {// 유효성 null,빈값/공백
-      throw new IllegalArgumentException("태그를 입력해 주세요.");
     }
 
 
@@ -156,7 +166,7 @@ public class LearningActivity extends BasicEntity {
   //완료율 정규화
   private static Integer completionRateNormalization(ActivityCategory category, Integer completionRate) {
     if(category != ActivityCategory.PRACTICE) {
-      return completionRate;
+      return null;
     }
     if(completionRate == null) {
       return 0;// 어차피 카테고리가 실습이면 완료율이 빈거보단 0이 안전할 듯
