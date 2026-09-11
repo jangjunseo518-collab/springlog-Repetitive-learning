@@ -25,6 +25,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LearningActivity extends BasicEntity {
 
+  //owner
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "owner_id")
+  private User owner;
+
   // 공통 필드
   @Column(nullable = false)
   private String title;
@@ -61,6 +66,14 @@ public class LearningActivity extends BasicEntity {
     this.instructorName = instructorNameNormalization(category, instructorName);
     this.completionRate = completionRateNormalization(category, completionRate);
     this.bookTitle = bookTitleNormalization(category, bookTitle);
+  }
+
+  //owner 필드 할당
+  public void assignOwner(User owner) {
+    if (owner == null) {
+      throw new IllegalArgumentException("사용자를 입력해주세요.");
+    }
+    this.owner = owner;
   }
 
   //========== 제목, 학습 시간 유효성 검증
@@ -176,7 +189,7 @@ public class LearningActivity extends BasicEntity {
     return completionRate;
   }
 
-  //책 제녹 정규화
+  //책 제목 정규화
   private static String bookTitleNormalization(ActivityCategory category, String bookTitle) {
     if(category != ActivityCategory.READING) {
       return null;
