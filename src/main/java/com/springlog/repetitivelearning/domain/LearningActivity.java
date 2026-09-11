@@ -100,15 +100,19 @@ public class LearningActivity extends BasicEntity {
 
   //태그 추가
   public void addTag(String tag) {
-    String standardizedTag = tag.trim().toLowerCase(); //정규화
-
-    if(tags.size() >= 10) {// 태그 추가 가능한지 먼저 검증
-      throw new IllegalArgumentException("태그는 10개 까지 추가할 수 있습니다.");
-    }
     if(tag == null || tag.isBlank()) {// 유효성 null,빈값/공백
       throw new IllegalArgumentException("태그를 입력해 주세요.");
     }
 
+    String standardizedTag = tag.trim().toLowerCase(); //정규화
+
+    if(tags.contains(standardizedTag)) {
+      return;
+    }
+
+    if(tags.size() >= 10) {// 태그 추가 가능한지 먼저 검증
+      throw new IllegalArgumentException("태그는 10개 까지 추가할 수 있습니다.");
+    }
 
     if(!standardizedTag.matches("^[a-zA-Z가-힣0-9@#-]+$")) {//유효성 검증 허용 문자
       throw new IllegalArgumentException("태그는 한글,영문,숫자,@,#,-만 작성할 수 있습니다.");
@@ -147,7 +151,9 @@ public class LearningActivity extends BasicEntity {
 
   //강사이름 정규화
   private static String instructorNameNormalization(ActivityCategory category, String instructorName) {
-    if(category == ActivityCategory.LECTURE && (instructorName == null || instructorName.isBlank())) {
+    if(category != ActivityCategory.LECTURE){
+      return null;
+    }else if(instructorName == null || instructorName.isBlank()) {
     return "강사 미정";
     }
     return instructorName;
@@ -156,7 +162,7 @@ public class LearningActivity extends BasicEntity {
   //완료율 정규화
   private static Integer completionRateNormalization(ActivityCategory category, Integer completionRate) {
     if(category != ActivityCategory.PRACTICE) {
-      return completionRate;
+      return null;
     }
     if(completionRate == null) {
       return 0;// 어차피 카테고리가 실습이면 완료율이 빈거보단 0이 안전할 듯
@@ -172,7 +178,9 @@ public class LearningActivity extends BasicEntity {
 
   //책 제녹 정규화
   private static String bookTitleNormalization(ActivityCategory category, String bookTitle) {
-    if(category == ActivityCategory.READING && (bookTitle == null || bookTitle.isBlank())) {
+    if(category != ActivityCategory.READING) {
+      return null;
+    } else if(bookTitle == null || bookTitle.isBlank()) {
       return "책 미정";
     }
     return bookTitle;
