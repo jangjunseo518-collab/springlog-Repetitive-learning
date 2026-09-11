@@ -25,6 +25,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LearningActivity extends BasicEntity {
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "owner_id")
+  private User owner;
+
   // 공통 필드
   @Column(nullable = false)
   private String title;
@@ -63,6 +67,14 @@ public class LearningActivity extends BasicEntity {
     this.bookTitle = bookTitleNormalization(category, bookTitle);
   }
 
+  public void assignOwner(User owner) {
+   if(owner == null) {
+     throw  new IllegalArgumentException("사용자를 입력해주세요.");
+   }
+    this.owner = owner;
+  }
+
+
   //========== 제목, 학습 시간 유효성 검증
   private static void validationTitle(String title) {
     if (title == null || title.isBlank()) {
@@ -100,15 +112,20 @@ public class LearningActivity extends BasicEntity {
 
   //태그 추가
   public void addTag(String tag) {
-    String standardizedTag = tag.trim().toLowerCase(); //정규화
 
-    if(tags.size() >= 10) {// 태그 추가 가능한지 먼저 검증
-      throw new IllegalArgumentException("태그는 10개 까지 추가할 수 있습니다.");
-    }
     if(tag == null || tag.isBlank()) {// 유효성 null,빈값/공백
       throw new IllegalArgumentException("태그를 입력해 주세요.");
     }
 
+    String standardizedTag = tag.trim().toLowerCase(); //정규화
+
+    if(tags.contains(standardizedTag)) {
+      return;
+    }
+
+    if(tags.size() >= 10) {// 태그 추가 가능한지 먼저 검증
+      throw new IllegalArgumentException("태그는 10개 까지 추가할 수 있습니다.");
+    }
 
     if(!standardizedTag.matches("^[a-zA-Z가-힣0-9@#-]+$")) {//유효성 검증 허용 문자
       throw new IllegalArgumentException("태그는 한글,영문,숫자,@,#,-만 작성할 수 있습니다.");
