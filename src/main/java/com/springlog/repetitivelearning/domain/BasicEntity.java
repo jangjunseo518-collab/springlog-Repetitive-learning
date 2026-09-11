@@ -26,9 +26,9 @@ public abstract class BasicEntity {
 
   @Column(nullable = false,  updatable = false)
   @CreatedDate
-  private LocalDateTime createdDate;
+  private LocalDateTime createdAt;
 
   @LastModifiedDate
-  private LocalDateTime updatedDate;
+  private LocalDateTime updatedAt;
 
 }
