@@ -10,6 +10,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,6 +24,11 @@ import lombok.NoArgsConstructor;
 @Table(name = "activities")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LearningActivity extends BasicEntity {
+  //owner
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "owner_id")
+  private User owner;
+
 
   // 공통 필드
   @Column(nullable = false)
@@ -60,6 +66,14 @@ public class LearningActivity extends BasicEntity {
     this.instructorName = instructorNameNormalization(category, instructorName);
     this.completionRate = completionRateNormalization(category, completionRate);
     this.bookTitle = bookTitleNormalization(category, bookTitle);
+  }
+
+  //assign
+  public void assignOwner(User owner) {
+    if (owner == null) {
+      throw new IllegalArgumentException("사용자를 입력해주세요");
+    }
+    this.owner = owner;
   }
 
   //========== 제목, 학습 시간 유효성 검증
