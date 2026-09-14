@@ -12,6 +12,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -36,6 +37,8 @@ public class LearningActivity extends BasicEntity {
   @Column(nullable = false)
   private int minutes;
 
+  private LocalDate studiedOn;
+
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "activity_tags",  joinColumns = @JoinColumn(name = "activity_id"))
   @Column(name = "tag")
@@ -54,13 +57,15 @@ public class LearningActivity extends BasicEntity {
   private Integer completionRate;
   private String bookTitle;
 
-  public LearningActivity(String title, int minutes, Visibility visibility,
-      ActivityCategory category,
+  public LearningActivity(String title, int minutes, LocalDate studiedOn,
+      Visibility visibility, ActivityCategory category,
       String instructorName, Integer completionRate, String bookTitle) {
     validationTitle(title);
     validationMinutes(minutes);
+    validationStudiedOn(LocalDate.now());
     this.title = title.trim();
     this.minutes = minutes;
+    this.studiedOn = studiedOn;
     this.visibility = visibility;
     this.category = category;
     this.instructorName = instructorNameNormalization(category, instructorName);
@@ -75,7 +80,7 @@ public class LearningActivity extends BasicEntity {
     this.owner = owner;
   }
 
-  //========== 제목, 학습 시간 유효성 검증
+  //========== 제목, 학습 시간, 공부한 날짜 유효성 검증
   private static void validationTitle(String title) {
     if (title == null || title.isBlank()) {
       throw new IllegalArgumentException("제목은 비워둘 수 없습니다.");
@@ -85,6 +90,12 @@ public class LearningActivity extends BasicEntity {
   private static void validationMinutes(int minutes) {
     if (minutes < 1) {
       throw new IllegalArgumentException("학습 시간은 1분 이상이여야 합니다.");
+    }
+  }
+
+  private static void validationStudiedOn(LocalDate studiedOn) {
+    if (studiedOn != null && studiedOn.isAfter(LocalDate.now())) {
+      throw new IllegalArgumentException("학습한 날은 미래일 수 없습미다.");
     }
   }
 
@@ -163,7 +174,7 @@ public class LearningActivity extends BasicEntity {
 
   //강사이름 정규화
   private static String instructorNameNormalization(ActivityCategory category, String instructorName) {
-    if(category != ActivityCategory.LECTURE){
+    if(category != ActivityCategory.LECTURE){ //Stage4 부터 요청 Dto청책으로 인해 해당 정규화는 동작하지 않음.
       return null;
     }else if(instructorName == null || instructorName.isBlank()) {
     return "강사 미정";
