@@ -12,6 +12,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -36,6 +38,9 @@ public class LearningActivity extends BasicEntity {
   @Column(nullable = false)
   private int minutes;
 
+
+  private LocalDate studiedOn;
+
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "activity_tags",  joinColumns = @JoinColumn(name = "activity_id"))
   @Column(name = "tag")
@@ -54,13 +59,15 @@ public class LearningActivity extends BasicEntity {
   private Integer completionRate;
   private String bookTitle;
 
-  public LearningActivity(String title, int minutes, Visibility visibility,
-      ActivityCategory category,
+  public LearningActivity(String title, int minutes, LocalDate studiedOn,
+      Visibility visibility, ActivityCategory category,
       String instructorName, Integer completionRate, String bookTitle) {
     validationTitle(title);
     validationMinutes(minutes);
+    validateStudiedOn(studiedOn);
     this.title = title.trim();
     this.minutes = minutes;
+    this.studiedOn = studiedOn;
     this.visibility = visibility;
     this.category = category;
     this.instructorName = instructorNameNormalization(category, instructorName);
@@ -75,6 +82,12 @@ public class LearningActivity extends BasicEntity {
     this.owner = owner;
   }
 
+  private static void validateStudiedOn(LocalDate studiedOn) {
+    if(studiedOn != null && studiedOn.isAfter(LocalDate.now())) {
+      throw new IllegalArgumentException("학습 시작 날짜는 미래일 수 없습니다.");
+    }
+  }
+
   //========== 제목, 학습 시간 유효성 검증
   private static void validationTitle(String title) {
     if (title == null || title.isBlank()) {
@@ -83,8 +96,8 @@ public class LearningActivity extends BasicEntity {
   }
 
   private static void validationMinutes(int minutes) {
-    if (minutes < 1) {
-      throw new IllegalArgumentException("학습 시간은 1분 이상이여야 합니다.");
+    if (minutes < 1 ||  minutes > 1440 ) {
+      throw new IllegalArgumentException("학습 시간은 1분 이상 24시간 이하만 입력 가능 합니다.");
     }
   }
 
