@@ -6,6 +6,7 @@ import com.springlog.repetitivelearning.domain.type.ActivityCategory;
 import com.springlog.repetitivelearning.domain.type.Visibility;
 import com.springlog.repetitivelearning.repository.ActivityRepository;
 import com.springlog.repetitivelearning.repository.UserRepository;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,7 @@ public class DataInitializer implements CommandLineRunner {
     User owner = new User("닉네임", "email@email.com");
     userRepository.save(owner);
 
-    LearningActivity activity = new LearningActivity("제목", 60, Visibility.PUBLIC,
+    LearningActivity activity = new LearningActivity("제목", 60, LocalDate.now(), Visibility.PUBLIC,
         ActivityCategory.LECTURE,
         "이강사", null, null);
     activity.assignOwner(owner);
