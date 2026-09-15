@@ -4,6 +4,7 @@ import com.springlog.repetitivelearning.domain.LearningActivity;
 import com.springlog.repetitivelearning.domain.User;
 import com.springlog.repetitivelearning.domain.type.ActivityCategory;
 import com.springlog.repetitivelearning.domain.type.Visibility;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -13,6 +14,7 @@ public record ActivityResponse(
     LocalDateTime updatedAt,
     String title,
     int minutes,
+    LocalDate studiedOn,
     Set<String> tags,
     Visibility visibility,
     ActivityCategory category,
@@ -34,6 +36,7 @@ public record ActivityResponse(
         activity.getUpdatedAt(),
         activity.getTitle(),
         activity.getMinutes(),
+        activity.getStudiedOn(),
         activity.getTags(),
         activity.getVisibility(),
         activity.getCategory(),

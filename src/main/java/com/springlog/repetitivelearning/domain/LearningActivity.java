@@ -12,6 +12,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -36,6 +37,8 @@ public class LearningActivity extends BasicEntity {
   @Column(nullable = false)
   private int minutes;
 
+  private LocalDate studiedOn;
+
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "activity_tags",  joinColumns = @JoinColumn(name = "activity_id"))
   @Column(name = "tag")
@@ -54,13 +57,16 @@ public class LearningActivity extends BasicEntity {
   private Integer completionRate;
   private String bookTitle;
 
-  public LearningActivity(String title, int minutes, Visibility visibility,
+  public LearningActivity(String title, int minutes, LocalDate studiedOn,
+      Visibility visibility,
       ActivityCategory category,
       String instructorName, Integer completionRate, String bookTitle) {
     validationTitle(title);
     validationMinutes(minutes);
+    validationStudiedOn(studiedOn);
     this.title = title.trim();
     this.minutes = minutes;
+    this.studiedOn = studiedOn;
     this.visibility = visibility;
     this.category = category;
     this.instructorName = instructorNameNormalization(category, instructorName);
@@ -85,6 +91,12 @@ public class LearningActivity extends BasicEntity {
   private static void validationMinutes(int minutes) {
     if (minutes < 1) {
       throw new IllegalArgumentException("학습 시간은 1분 이상이여야 합니다.");
+    }
+  }
+
+  private static void validationStudiedOn(LocalDate studiedOn) {
+    if(studiedOn != null && studiedOn.isAfter(LocalDate.now())) {
+      throw new IllegalArgumentException("학습한 날짜는 미래일 수 없습니다.");
     }
   }
 
@@ -159,7 +171,8 @@ public class LearningActivity extends BasicEntity {
 
 
 
-  //========== 카태고리별 전용 속성 정규화
+  //========== 카태고리별 전용 속성 정규화 [요청 dto 정규화 정책 때문에 이미 죽은 정규화.]
+  // 기록의 의미로 남겨둠.
 
   //강사이름 정규화
   private static String instructorNameNormalization(ActivityCategory category, String instructorName) {
