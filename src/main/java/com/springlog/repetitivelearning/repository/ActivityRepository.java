@@ -10,4 +10,5 @@ public interface ActivityRepository extends JpaRepository<LearningActivity, Long
 
   List<LearningActivity> findByOwnerId(Long ownerId);
 
+
 }
