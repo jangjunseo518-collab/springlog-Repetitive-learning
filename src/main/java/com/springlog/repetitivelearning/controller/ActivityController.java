@@ -1,5 +1,6 @@
 package com.springlog.repetitivelearning.controller;
 
+import com.springlog.repetitivelearning.dto.request.AddTagsRequest;
 import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
 import com.springlog.repetitivelearning.service.ActivityService;
@@ -8,6 +9,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +43,33 @@ public class ActivityController {
     List<ActivityResponse> activities = activityService.getActivitiesByOwnerId(ownerId);
 
     return ResponseEntity.status(HttpStatus.OK).body(activities);
+  }
+
+  //tags
+  @PostMapping("/{activityId}/tags")
+  public ResponseEntity<ActivityResponse> addTags(
+      @PathVariable Long activityId , @RequestBody @Valid AddTagsRequest request){
+    ActivityResponse activity = activityService.addTags(activityId, request);
+
+    return ResponseEntity.status(HttpStatus.OK).body(activity);
+  }
+
+
+  @GetMapping("/{activityId}/tags/{tag}")
+  public ResponseEntity<Boolean> existenceTag(
+      @PathVariable Long activityId ,
+      @PathVariable String tag){
+    boolean existenceTag = activityService.tagExistence(activityId, tag);
+
+    return ResponseEntity.status(HttpStatus.OK).body(existenceTag);
+  }
+
+  @DeleteMapping("/{activityId}/tags/{tag}")
+  public ResponseEntity<Void> deleteTag(
+      @PathVariable Long activityId , @PathVariable String tag
+  ) {
+    activityService.deleteTag(activityId, tag);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
 }
