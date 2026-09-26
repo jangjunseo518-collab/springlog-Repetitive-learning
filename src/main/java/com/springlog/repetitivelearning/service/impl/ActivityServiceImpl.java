@@ -1,7 +1,9 @@
 package com.springlog.repetitivelearning.service.impl;
 
+
 import com.springlog.repetitivelearning.domain.LearningActivity;
 import com.springlog.repetitivelearning.domain.User;
+import com.springlog.repetitivelearning.dto.request.AddTagsRequest;
 import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
 import com.springlog.repetitivelearning.exception.ActivityNotFoundException;
@@ -55,5 +57,40 @@ public class ActivityServiceImpl implements ActivityService {
 
     return activities.stream()
         .map(ActivityResponse::from).toList();
+  }
+
+  @Override
+  @Transactional
+  public ActivityResponse addTags(Long activityId, AddTagsRequest request) {
+    LearningActivity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    request.tags().forEach(activity::addTag);
+    LearningActivity saved = activityRepository.save(activity);
+
+    return ActivityResponse.from(saved);
+  }
+
+  @Override
+  public boolean tagExistence(Long activityId, String tag) {
+
+    LearningActivity activity = activityRepository.findById(activityId).orElseThrow(
+        () -> new ActivityNotFoundException(activityId)
+    );
+
+    boolean hasTag = activity.hasTag(tag);
+
+    return hasTag;
+  }
+
+  @Override
+  @Transactional
+  public void deleteTag(Long activityId, String tag) {
+
+    LearningActivity activity = activityRepository.findById(activityId).orElseThrow(
+        () -> new ActivityNotFoundException(activityId)
+    );
+
+    activity.removeTag(tag);
   }
 }
