@@ -3,8 +3,14 @@ package com.springlog.repetitivelearning.service;
 import com.springlog.repetitivelearning.domain.type.Visibility;
 import com.springlog.repetitivelearning.dto.request.AddTagsRequest;
 import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
+import com.springlog.repetitivelearning.dto.request.PagingRequest;
+import com.springlog.repetitivelearning.dto.request.SearchRequest;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
+import com.springlog.repetitivelearning.dto.response.PageResponse;
+import com.springlog.repetitivelearning.dto.response.SliceResponse;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 
 public interface ActivityService {
 
@@ -17,4 +23,10 @@ public interface ActivityService {
   ActivityResponse addTags(Long activityId , AddTagsRequest request);
   boolean tagExistence(Long activityId, String tag);
   void deleteTag(Long activityId, String tag);
+
+  PageResponse getAllPublicActivitiesByPage(PagingRequest request);
+  SliceResponse getAllPublicActivitiesBySlice(PagingRequest response);
+
+  //List<ActivityResponse> getAllPublicActivities(SearchRequest searchRequest);
+  //리스트 조회 메서드 구현하면 끝
 }
