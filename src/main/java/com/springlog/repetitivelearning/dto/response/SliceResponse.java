@@ -3,7 +3,7 @@ package com.springlog.repetitivelearning.dto.response;
 import org.springframework.data.domain.Slice;
 
 public record SliceResponse(
-    Slice<ActivityResponse> date,
+    Slice<ActivityResponse> data,
     String adjustedMessage,
     Boolean hasNext
 ) {

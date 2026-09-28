@@ -9,8 +9,6 @@ import com.springlog.repetitivelearning.dto.response.ActivityResponse;
 import com.springlog.repetitivelearning.dto.response.PageResponse;
 import com.springlog.repetitivelearning.dto.response.SliceResponse;
 import java.util.List;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 
 public interface ActivityService {
 
@@ -27,6 +25,6 @@ public interface ActivityService {
   PageResponse getAllPublicActivitiesByPage(PagingRequest request);
   SliceResponse getAllPublicActivitiesBySlice(PagingRequest response);
 
-  //List<ActivityResponse> getAllPublicActivities(SearchRequest searchRequest);
-  //리스트 조회 메서드 구현하면 끝
+  List<ActivityResponse> getAllPublicActivities(SearchRequest searchRequest);
+
 }

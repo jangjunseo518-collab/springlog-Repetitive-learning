@@ -19,15 +19,14 @@ import com.springlog.repetitivelearning.exception.OwnerNotFoundException;
 import com.springlog.repetitivelearning.repository.ActivityRepository;
 import com.springlog.repetitivelearning.repository.UserRepository;
 import com.springlog.repetitivelearning.service.ActivityService;
+import com.springlog.repetitivelearning.service.helper.VisibilityValidator;
 import com.springlog.repetitivelearning.service.helper.paging.PagingSetup;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 
 @Service
 @Transactional(readOnly = true)
@@ -135,7 +134,29 @@ public class ActivityServiceImpl implements ActivityService {
 
   }
 
+  @Override
+  public List<ActivityResponse> getAllPublicActivities(SearchRequest searchRequest) {
 
+    Visibility visibility = visibilityPublicValidator(searchRequest.visibility());
 
+    if(searchRequest.category()!= null){
+      List<LearningActivity> activities = activityRepository.findByCategoryAndVisibility(
+          searchRequest.category(), visibility);
+      return activities.stream().map(ActivityResponse::from).toList();
+    }
+    if(searchRequest.titleKeyword()!= null && !searchRequest.titleKeyword().isBlank()){
+      List<LearningActivity> activities = activityRepository.findByTitleContainingIgnoreCaseAndVisibility(
+          searchRequest.titleKeyword(), visibility);
+      return activities.stream().map(ActivityResponse::from).toList();
+    }
+    if(searchRequest.minMinutes() != null){
+      List<LearningActivity> activities = activityRepository.findByMinutesGreaterThanEqualAndVisibility(
+          searchRequest.minMinutes(), visibility);
+      return activities.stream().map(ActivityResponse::from).toList();
+    }
+
+    return activityRepository.findByVisibility(visibility).stream()
+        .map(ActivityResponse::from).toList();
+  }
 
 }

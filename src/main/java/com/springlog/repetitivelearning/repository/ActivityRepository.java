@@ -24,5 +24,5 @@ public interface ActivityRepository extends JpaRepository<LearningActivity, Long
   List<LearningActivity> findByTitleContainingIgnoreCaseAndVisibility(String title, Visibility visibility);
   List<LearningActivity> findByMinutesGreaterThanEqualAndVisibility(int minMinutes, Visibility visibility);
   List<LearningActivity> findByCategoryAndVisibility(ActivityCategory category, Visibility visibility);
-  List<LearningActivity> findByVisbility(Visibility visibility);
+  List<LearningActivity> findByVisibility(Visibility visibility);
 }

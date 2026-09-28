@@ -20,7 +20,7 @@ public record CreateActivityRequest(
     @Size(max = 100, message = "제목은 100자를 넘을 수 없습니다.")
     String title,
 
-    @NotNull(message = "학습 시간을 입력해 주세요.")
+    @NotNull(message = "학습 시간을 입력해 주세요.")//사실상 사용 안되는 검증. 필드가 int라서 null이 들어오면 0이 할당됨
     @Max(value = 1440, message = "학습 시간은 하루(1440분)을 넘을 수 없습니다.")
     @Min(value = 1, message = "학습 시간은 최소 1분 이상 부터 입력 가능합니다.")
     int minutes,
