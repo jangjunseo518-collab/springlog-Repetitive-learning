@@ -2,15 +2,22 @@ package com.springlog.repetitivelearning.controller;
 
 import com.springlog.repetitivelearning.dto.request.AddTagsRequest;
 import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
+import com.springlog.repetitivelearning.dto.request.PagingRequest;
+import com.springlog.repetitivelearning.dto.request.SearchRequest;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
+import com.springlog.repetitivelearning.dto.response.PageResponse;
+import com.springlog.repetitivelearning.dto.response.SliceResponse;
 import com.springlog.repetitivelearning.service.ActivityService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,13 +34,13 @@ public class ActivityController {
 
   @PostMapping
   public ResponseEntity<ActivityResponse> createActivity(
-      @RequestBody @Valid CreateActivityRequest request){
+      @RequestBody @Valid CreateActivityRequest request) {
     ActivityResponse activity = activityService.createActivity(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(activity);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ActivityResponse> getActivityById(@PathVariable Long id){
+  public ResponseEntity<ActivityResponse> getActivityById(@PathVariable Long id) {
     ActivityResponse activity = activityService.getActivity(id);
     return ResponseEntity.status(HttpStatus.OK).body(activity);
   }
@@ -48,7 +55,7 @@ public class ActivityController {
   //tags
   @PostMapping("/{activityId}/tags")
   public ResponseEntity<ActivityResponse> addTags(
-      @PathVariable Long activityId , @RequestBody @Valid AddTagsRequest request){
+      @PathVariable Long activityId, @RequestBody @Valid AddTagsRequest request) {
     ActivityResponse activity = activityService.addTags(activityId, request);
 
     return ResponseEntity.status(HttpStatus.OK).body(activity);
@@ -57,8 +64,8 @@ public class ActivityController {
 
   @GetMapping("/{activityId}/tags/{tag}")
   public ResponseEntity<Boolean> existenceTag(
-      @PathVariable Long activityId ,
-      @PathVariable String tag){
+      @PathVariable Long activityId,
+      @PathVariable String tag) {
     boolean existenceTag = activityService.tagExistence(activityId, tag);
 
     return ResponseEntity.status(HttpStatus.OK).body(existenceTag);
@@ -66,10 +73,40 @@ public class ActivityController {
 
   @DeleteMapping("/{activityId}/tags/{tag}")
   public ResponseEntity<Void> deleteTag(
-      @PathVariable Long activityId , @PathVariable String tag
+      @PathVariable Long activityId, @PathVariable String tag
   ) {
     activityService.deleteTag(activityId, tag);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  //Paging
+  @GetMapping("/page")
+  public ResponseEntity<PageResponse> getActivitiesByPage(
+      @ModelAttribute PagingRequest pagingRequest) {
+
+    PageResponse allPublicActivitiesPage = activityService.getAllPublicActivitiesPage(
+        pagingRequest);
+
+    return ResponseEntity.status(HttpStatus.OK).body(allPublicActivitiesPage);
+  }
+
+  @GetMapping("/slice")
+  public ResponseEntity<SliceResponse> getActivitiesBySlice(
+      @ModelAttribute PagingRequest pagingRequest) {
+
+    SliceResponse allPublicActivitiesSlice = activityService.getAllPublicActivitiesSlice(
+        pagingRequest);
+
+    return ResponseEntity.status(HttpStatus.OK).body(allPublicActivitiesSlice);
+  }
+
+  @GetMapping("/search")
+  public ResponseEntity<List<ActivityResponse>> getActivitiesBySearch(
+      @ModelAttribute SearchRequest searchRequest) {
+
+    List<ActivityResponse> searchActivities = activityService.getSearchActivities(searchRequest);
+
+    return ResponseEntity.status(HttpStatus.OK).body(searchActivities);
   }
 
 }
