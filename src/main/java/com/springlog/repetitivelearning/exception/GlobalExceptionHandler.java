@@ -2,9 +2,11 @@ package com.springlog.repetitivelearning.exception;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -47,8 +49,20 @@ public class GlobalExceptionHandler {
     );
 
     e.getBindingResult().getFieldErrors().forEach( (fieldError) -> {
-      errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+      boolean contains = fieldError.contains(TypeMismatchException.class);
+      if(contains) {
+        TypeMismatchException unwrap = fieldError.unwrap(TypeMismatchException.class);
+        Object value = unwrap.getValue();
+        Class<?> requiredType = unwrap.getRequiredType();
+        Object[] enumConstants = requiredType != null? requiredType.getEnumConstants(): null;
+        String field = fieldError.getField();
+
+        errors.put(field, field+"필드에 잘못된 값이 입력되었습니다. 입렧값: "
+                                 +value+" | 하용값: "+ Arrays.toString(enumConstants));
+       } else {
+          errors.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
+      }
     );
 
     problemDetail.setTitle("필드 검증 실패");
@@ -70,6 +84,45 @@ public class GlobalExceptionHandler {
     problemDetail.setProperty("발생 시간",  Instant.now().atZone(
         ZoneId.of("Asia/Seoul")));
 
+    return problemDetail;
+  }
+
+  @ExceptionHandler(VisibilityNotPublicException.class)
+  public ProblemDetail visibilityNotPublicException(VisibilityNotPublicException e) {
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        HttpStatus.BAD_REQUEST, e.getMessage()
+    );
+
+    problemDetail.setTitle("공개활동 조회로 공개활동 외 활동 조회");
+    problemDetail.setProperty("발생 시간",  Instant.now().atZone(
+        ZoneId.of("Asia/Seoul")
+    ));
+
+    return problemDetail;
+  }
+
+  @ExceptionHandler(PageValidationFailureException.class)
+  public ProblemDetail pageValidationFailureException(PageValidationFailureException e) {
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        HttpStatus.BAD_REQUEST, e.getMessage()
+    );
+
+    problemDetail.setTitle("page 음수 입력");
+    problemDetail.setProperty("발생 시간",  Instant.now().atZone(
+        ZoneId.of("Asia/Seoul")
+    ));
+    return problemDetail;
+  }
+
+  @ExceptionHandler(InvalidSortFieldException.class)
+  public ProblemDetail invalidSortFieldException(InvalidSortFieldException e) {
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        HttpStatus.BAD_REQUEST, e.getMessage()
+    );
+    problemDetail.setTitle("지원하지 않는 정렬 기준");
+    problemDetail.setProperty("발생 시간", Instant.now().atZone(
+        ZoneId.of("Asia/Seoul")
+    ));
     return problemDetail;
   }
 
