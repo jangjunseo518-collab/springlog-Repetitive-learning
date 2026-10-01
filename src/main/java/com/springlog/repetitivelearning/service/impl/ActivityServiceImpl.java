@@ -1,5 +1,6 @@
 package com.springlog.repetitivelearning.service.impl;
 
+import static com.springlog.repetitivelearning.service.helper.VisibiltyValidator.publicVisibilityValidator;
 import static com.springlog.repetitivelearning.service.helper.page.PagingHelper.buildPagingSetup;
 
 import com.springlog.repetitivelearning.domain.LearningActivity;
@@ -7,6 +8,7 @@ import com.springlog.repetitivelearning.domain.User;
 import com.springlog.repetitivelearning.domain.type.Visibility;
 import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
 import com.springlog.repetitivelearning.dto.request.PagingRequest;
+import com.springlog.repetitivelearning.dto.request.SearchRequest;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
 import com.springlog.repetitivelearning.dto.response.PageResponse;
 import com.springlog.repetitivelearning.dto.response.SliceResponse;
@@ -16,6 +18,7 @@ import com.springlog.repetitivelearning.repository.ActivityRepository;
 import com.springlog.repetitivelearning.repository.UserRepository;
 import com.springlog.repetitivelearning.service.ActivityService;
 import com.springlog.repetitivelearning.service.helper.page.PagingSetup;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -96,5 +99,35 @@ public class ActivityServiceImpl implements ActivityService {
     boolean hasNext = activitiesSlice.hasNext();
 
     return SliceResponse.of(activitiesSlice, adjustedMessage, hasNext);
+  }
+
+  @Override
+  public List<ActivityResponse> getAllActivitiesList(SearchRequest searchRequest) {
+    Visibility visibility = publicVisibilityValidator(searchRequest.visibility());
+
+    if(searchRequest.category() != null ) {
+      List<LearningActivity> activities =
+          activityRepository.findByCategoryAndVisibility(
+          searchRequest.category(), visibility);
+      List<ActivityResponse> activitiseList = activities.stream()
+          .map(ActivityResponse::from).toList();
+      return activitiseList;
+    }
+    if(searchRequest.titleKeyword() != null && !searchRequest.titleKeyword().isBlank()) {
+      List<LearningActivity> activities =
+          activityRepository.findByTitleContainingIgnoreCaseAndVisibility(
+          searchRequest.titleKeyword(), visibility);
+      return activities.stream()
+          .map(ActivityResponse::from).toList();
+    }
+    if(searchRequest.minMinutes() != null) {
+      List<ActivityResponse> activitiesList = activityRepository.findByMinutesGreaterThanEqualAndVisibility(
+              searchRequest.minMinutes(), visibility).stream()
+          .map(ActivityResponse::from).toList();
+      return activitiesList;
+    }
+
+    return activityRepository.findByVisibility(visibility)
+        .stream().map(ActivityResponse::from).toList();
   }
 }

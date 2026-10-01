@@ -2,6 +2,7 @@ package com.springlog.repetitivelearning.controller;
 
 import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
 import com.springlog.repetitivelearning.dto.request.PagingRequest;
+import com.springlog.repetitivelearning.dto.request.SearchRequest;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
 import com.springlog.repetitivelearning.dto.response.PageResponse;
 import com.springlog.repetitivelearning.dto.response.SliceResponse;
@@ -60,6 +61,12 @@ public class ActivityController {
   public ResponseEntity<SliceResponse> getActivitiesBySlice(@ModelAttribute PagingRequest pagingRequest){
     SliceResponse activitiesSlice = activityService.getActivitiesSlice(pagingRequest);
     return ResponseEntity.status(HttpStatus.OK).body(activitiesSlice);
+  }
+
+  @GetMapping("/search")
+  public ResponseEntity<List<ActivityResponse>> getActivitiesBySearch(SearchRequest searchRequest){
+    List<ActivityResponse> allActivitiesList = activityService.getAllActivitiesList(searchRequest);
+    return ResponseEntity.status(HttpStatus.OK).body(allActivitiesList);
   }
 
 }

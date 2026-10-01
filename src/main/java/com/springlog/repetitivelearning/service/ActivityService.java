@@ -2,6 +2,7 @@ package com.springlog.repetitivelearning.service;
 
 import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
 import com.springlog.repetitivelearning.dto.request.PagingRequest;
+import com.springlog.repetitivelearning.dto.request.SearchRequest;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
 import com.springlog.repetitivelearning.dto.response.PageResponse;
 import com.springlog.repetitivelearning.dto.response.SliceResponse;
@@ -17,5 +18,7 @@ public interface ActivityService {
 
   PageResponse getActivitiesPage(PagingRequest pagingRequest);
   SliceResponse getActivitiesSlice(PagingRequest pagingRequest);
+
+  List<ActivityResponse> getAllActivitiesList(SearchRequest searchRequest);
 
 }
