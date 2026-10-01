@@ -2,9 +2,11 @@ package com.springlog.repetitivelearning.exception;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -46,8 +48,20 @@ public class GlobalExceptionHandler {
         HttpStatus.BAD_REQUEST, "필드 검증에 실패했습니다."
     );
 
-    e.getBindingResult().getFieldErrors().forEach( (fieldError) -> {
-      errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+    e.getBindingResult().getFieldErrors().forEach(
+        (fieldError) -> {
+
+      boolean contains = fieldError.contains(TypeMismatchException.class);
+      if(contains) {
+        TypeMismatchException unwrap = fieldError.unwrap(TypeMismatchException.class);
+        Object value = unwrap.getValue();
+        Class<?> requiredType = unwrap.getRequiredType();
+        Object[] enumConstants = requiredType != null
+            ? requiredType.getEnumConstants() : null;
+        String field = fieldError.getField();
+        errors.put(field,field+"필드에 잘못된 값이 입력되었습니다. 입력 값: "
+        +value+" | 허용 값 :"+ Arrays.toString(enumConstants));
+      } else errors.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
     );
 
@@ -70,6 +84,42 @@ public class GlobalExceptionHandler {
     problemDetail.setProperty("발생 시간",  Instant.now().atZone(
         ZoneId.of("Asia/Seoul")));
 
+    return problemDetail;
+  }
+
+  @ExceptionHandler(NotPublicVisibilityException.class)
+  public ProblemDetail visibilityNotPublicException(NotPublicVisibilityException e) {
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        HttpStatus.BAD_REQUEST, e.getMessage()
+    );
+    problemDetail.setTitle("공개활동 조회로 비공개활동 조회 시도");
+    problemDetail.setProperty("발새 시간",  Instant.now().atZone(
+        ZoneId.of("Asia/Seoul")
+    ));
+    return problemDetail;
+  }
+
+  @ExceptionHandler(NotValidSortFieldException.class)
+  public ProblemDetail notValidSortFieldException(NotValidSortFieldException e) {
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        HttpStatus.BAD_REQUEST, e.getMessage()
+    );
+    problemDetail.setTitle("유효하지 읺은 정렬 기준");
+    problemDetail.setProperty("발생 시간",  Instant.now().atZone(
+        ZoneId.of("Asia/Seoul")
+    ));
+    return problemDetail;
+  }
+
+  @ExceptionHandler(NotValidPageException.class)
+  public ProblemDetail notPageValidException(NotValidPageException e) {
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        HttpStatus.BAD_REQUEST, e.getMessage()
+    );
+    problemDetail.setTitle("page에 음수 입력");
+    problemDetail.setProperty("발생 시간",  Instant.now().atZone(
+        ZoneId.of("Asia/Seoul")
+    ));
     return problemDetail;
   }
 

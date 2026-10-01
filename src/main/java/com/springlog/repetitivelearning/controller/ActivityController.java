@@ -1,14 +1,20 @@
 package com.springlog.repetitivelearning.controller;
 
 import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
+import com.springlog.repetitivelearning.dto.request.PagingRequest;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
+import com.springlog.repetitivelearning.dto.response.PageResponse;
+import com.springlog.repetitivelearning.dto.response.SliceResponse;
 import com.springlog.repetitivelearning.service.ActivityService;
+import com.springlog.repetitivelearning.service.helper.page.PagingSetup;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +47,19 @@ public class ActivityController {
     List<ActivityResponse> activities = activityService.getActivitiesByOwnerId(ownerId);
 
     return ResponseEntity.status(HttpStatus.OK).body(activities);
+  }
+
+  @GetMapping("/page")
+  public ResponseEntity<PageResponse> getActivitiesByPage(
+      @ModelAttribute PagingRequest pagingRequest){
+    PageResponse activitiesPage = activityService.getActivitiesPage(pagingRequest);
+    return ResponseEntity.status(HttpStatus.OK).body(activitiesPage);
+  }
+
+  @GetMapping("/slice")
+  public ResponseEntity<SliceResponse> getActivitiesBySlice(@ModelAttribute PagingRequest pagingRequest){
+    SliceResponse activitiesSlice = activityService.getActivitiesSlice(pagingRequest);
+    return ResponseEntity.status(HttpStatus.OK).body(activitiesSlice);
   }
 
 }
