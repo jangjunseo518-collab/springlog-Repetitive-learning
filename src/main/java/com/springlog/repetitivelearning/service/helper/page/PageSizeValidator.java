@@ -21,7 +21,7 @@ public class PageSizeValidator {
       +"| 조정 값: "+PAGE_MIN_SIZE);
     }
     if(pageSize > PAGE_MAX_SIZE) {
-      return PageSizeResult.of(PAGE_MIN_SIZE,
+      return PageSizeResult.of(PAGE_MAX_SIZE,
           "pageSize는 100까지 입력 가능합니다. \n입력 값:" + pageSize
           +"| 조정 값: "+PAGE_MAX_SIZE);
     }
