@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
   public ProblemDetail activityNotFoundException(ActivityNotFoundException e) {
     ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
         HttpStatus.NOT_FOUND, e.getMessage()
-    );
+     );
 
     problemDetail.setTitle("활동을 찾지 못함");
     problemDetail.setProperty("발생 시간",  Instant.now().atZone(ZoneId.of("Asia/Seoul")));
