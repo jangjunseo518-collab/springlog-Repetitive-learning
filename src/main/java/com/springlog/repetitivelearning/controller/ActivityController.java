@@ -7,6 +7,7 @@ import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
 import com.springlog.repetitivelearning.dto.request.PagingRequest;
 import com.springlog.repetitivelearning.dto.request.SearchRequest;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
+import com.springlog.repetitivelearning.dto.response.CountCategoryResponse;
 import com.springlog.repetitivelearning.dto.response.PageResponse;
 import com.springlog.repetitivelearning.dto.response.SliceResponse;
 import com.springlog.repetitivelearning.service.ActivityDashboard;
@@ -108,37 +109,42 @@ public class ActivityController {
       @ModelAttribute SearchRequest searchRequest) {
     List<ActivityResponse> activities = activityService.getAllPublicActivities(
         searchRequest);
+
     return ResponseEntity.status(HttpStatus.OK).body(activities);
   }
 
   @GetMapping("/all/tags")
   public ResponseEntity<List<ActivityResponse>> getAllTags(
-      @RequestParam(required = false) String tag,
-      @RequestParam Visibility visibility) {
+      @RequestParam String tag,
+      @RequestParam(required = false) Visibility visibility) {
+
     List<ActivityResponse> activityByTag = dashboard.findByTag(tag, visibility);
+
     return ResponseEntity.status(HttpStatus.OK).body(activityByTag);
   }
 
   @GetMapping("/group/category")
   public ResponseEntity<Map<ActivityCategory, List<ActivityResponse>>> getGroupByCategory(
-      @RequestParam Visibility visibility
+      @RequestParam(required = false) Visibility visibility
   ){
-    Map<ActivityCategory, List<ActivityResponse>> categoryListMap = dashboard.groupByCategory(
-        visibility);
+    Map<ActivityCategory, List<ActivityResponse>> categoryListMap =
+        dashboard.groupByCategory(visibility);
+
     return ResponseEntity.status(HttpStatus.OK).body(categoryListMap);
   }
 
   @GetMapping("/count/category")
-  public ResponseEntity<Map<ActivityCategory, Long>> getCountByCategory(
-      @RequestParam Visibility visibility
+  public ResponseEntity<CountCategoryResponse> getCountByCategory(
+      @RequestParam(required = false) Visibility visibility
   ) {
-    Map<ActivityCategory, Long> activityCategoryLongMap = dashboard.countByCategroy(visibility);
-    return ResponseEntity.status(HttpStatus.OK).body(activityCategoryLongMap);
+    CountCategoryResponse countCategoryResponse = dashboard.countByCategroy(visibility);
+
+    return ResponseEntity.status(HttpStatus.OK).body(countCategoryResponse);
   }
 
   @GetMapping("/sort/all/tags")
   public ResponseEntity<Set<String>>  getAllTags(
-      @RequestParam Visibility visibility
+      @RequestParam(required = false) Visibility visibility
   ) {
     Set<String> sortAllTags = dashboard.sortByAllTags(visibility);
     return ResponseEntity.status(HttpStatus.OK).body(sortAllTags);

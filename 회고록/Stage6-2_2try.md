@@ -17,9 +17,19 @@
 - controller에서는 모두 쿼리스트링으로 받는다.
 
 ## [아쉬운 점]
->이번 stage` `/ ` `TRY에서 느낀 어려운 점이나 배운 점을 기록한다.
+>이번 stage`6-2`/ `2`TRY에서 느낀 어려운 점이나 배운 점을 기록한다.
 
-### [느낀 점] :
+개수 요약에서 전체 개수를 누락한 상태로 서비스를 구현했고, 응답 dto를 만들고서 정작 사용하지 않았다. 
+<br>@RequestParam(required = false)의 의미를 반대로 생각해서 처음에 visibility를 받을때 사용 안 했다.
+<br> 동일한 이유로 /all/tags에서 tag를 생략 가능하게 했었다. 필수가 아닌 것에 붙인다는 걸 다시 상기하자.
+<br>태그 조회시 trim만 있고 소문자 변환이 없어서 실제 조회시에 불명확한 로직을 만듬. 
+
+
+### [느낀 점] : 뇌빼고 하지 말고 생각을 하면서 코드를 만들도록 하자. 
+
+
+
+
 <br>
 
 ```angular2html
@@ -46,7 +56,7 @@ List<LearningActivity> activities = activityRepository.findByVisibility(
 <br><br><br>
 
 > ## [긍정 평가]
-> - 내용작성
+> - 빌드 흐름 자체는 이해한 듯 하다. 
 ---
 
 

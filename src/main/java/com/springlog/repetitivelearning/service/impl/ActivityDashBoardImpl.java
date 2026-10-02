@@ -6,6 +6,7 @@ import com.springlog.repetitivelearning.domain.LearningActivity;
 import com.springlog.repetitivelearning.domain.type.ActivityCategory;
 import com.springlog.repetitivelearning.domain.type.Visibility;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
+import com.springlog.repetitivelearning.dto.response.CountCategoryResponse;
 import com.springlog.repetitivelearning.repository.ActivityRepository;
 import com.springlog.repetitivelearning.service.ActivityDashboard;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class ActivityDashBoardImpl implements ActivityDashboard {
 
   @Override
   public List<ActivityResponse> findByTag(String tag, Visibility visibility) {
-    String trim = tag.trim();
+    String trim = tag.trim().toLowerCase();
 
     List<LearningActivity> activities = activityRepository.findByTagsContainingAndVisibility(
         trim, visibilityPublicValidator(visibility));
@@ -56,7 +57,7 @@ public class ActivityDashBoardImpl implements ActivityDashboard {
   }
 
   @Override
-  public Map<ActivityCategory, Long> countByCategroy(Visibility visibility) {
+  public CountCategoryResponse countByCategroy(Visibility visibility) {
 
     Map<ActivityCategory, Long> countCategory = new EnumMap<>(ActivityCategory.class);
 
@@ -67,13 +68,15 @@ public class ActivityDashBoardImpl implements ActivityDashboard {
       countCategory.put(category, 0L);
     }
 
+    long total = countCategory.size();
+
     for (LearningActivity activity : activities) {
       countCategory.merge(activity.getCategory(), 1L, Long::sum);
     }
 
 
 
-    return countCategory;
+    return CountCategoryResponse.of(total, countCategory);
   }
 
   @Override
