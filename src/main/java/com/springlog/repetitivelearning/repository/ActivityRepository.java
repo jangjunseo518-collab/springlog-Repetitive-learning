@@ -3,7 +3,6 @@ package com.springlog.repetitivelearning.repository;
 import com.springlog.repetitivelearning.domain.LearningActivity;
 import com.springlog.repetitivelearning.domain.type.ActivityCategory;
 import com.springlog.repetitivelearning.domain.type.Visibility;
-import com.springlog.repetitivelearning.dto.response.ActivityResponse;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,4 +24,6 @@ public interface ActivityRepository extends JpaRepository<LearningActivity, Long
   List<LearningActivity> findByMinutesGreaterThanEqualAndVisibility(int minMinutes, Visibility visibility);
   List<LearningActivity> findByCategoryAndVisibility(ActivityCategory category, Visibility visibility);
   List<LearningActivity> findByVisibility(Visibility visibility);
+  List<LearningActivity> findByTagsContainingAndVisibility(String tags, Visibility visibility);
+
 }

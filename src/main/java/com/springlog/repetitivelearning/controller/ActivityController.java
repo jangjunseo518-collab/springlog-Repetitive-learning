@@ -1,17 +1,22 @@
 package com.springlog.repetitivelearning.controller;
 
+import com.springlog.repetitivelearning.domain.type.ActivityCategory;
+import com.springlog.repetitivelearning.domain.type.Visibility;
 import com.springlog.repetitivelearning.dto.request.AddTagsRequest;
 import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
 import com.springlog.repetitivelearning.dto.request.PagingRequest;
 import com.springlog.repetitivelearning.dto.request.SearchRequest;
+import com.springlog.repetitivelearning.dto.response.ActivityCountResponse;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
 import com.springlog.repetitivelearning.dto.response.PageResponse;
 import com.springlog.repetitivelearning.dto.response.SliceResponse;
+import com.springlog.repetitivelearning.service.ActivityDashboard;
 import com.springlog.repetitivelearning.service.ActivityService;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ActivityController {
 
   private final ActivityService activityService;
+  private final ActivityDashboard dashboard;
 
   @PostMapping
   public ResponseEntity<ActivityResponse> createActivity(
@@ -104,4 +110,39 @@ public class ActivityController {
         searchRequest);
     return ResponseEntity.status(HttpStatus.OK).body(activities);
   }
+
+  @GetMapping("/count/all")
+  public ResponseEntity<ActivityCountResponse> getCountByCategory(
+      @RequestParam(required = false) Visibility visibility) {
+    ActivityCountResponse countResponse = dashboard.countByCategory(visibility);
+    return ResponseEntity.status(HttpStatus.OK).body(countResponse);
+  }
+
+  @GetMapping("/group/categories")
+  public ResponseEntity<Map<ActivityCategory, List<ActivityResponse>>> getGroupByCategory(
+      @RequestParam(required = false) Visibility visibility) {
+    Map<ActivityCategory, List<ActivityResponse>> categoryListMap =
+                                                 dashboard.groupByCategory(visibility);
+    return ResponseEntity.status(HttpStatus.OK).body(categoryListMap);
+
+  }
+
+  @GetMapping("/tags")
+  public ResponseEntity<List<ActivityResponse>> getActivitiesByTag(
+      @RequestParam String tag,
+      @RequestParam(required = false) Visibility visibility
+  ){
+    List<ActivityResponse> activitiesByTag = dashboard.findByTag(tag, visibility);
+    return ResponseEntity.status(HttpStatus.OK).body(activitiesByTag);
+  }
+
+  @GetMapping("/tags/all")
+  public ResponseEntity<Set<String>> getTags(@RequestParam(required = false) Visibility visibility) {
+    Set<String> sortByTags = dashboard.getSortByTags(visibility);
+    return ResponseEntity.status(HttpStatus.OK).body(sortByTags);
+  }
+
+
+
+
 }
