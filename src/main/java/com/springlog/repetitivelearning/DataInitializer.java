@@ -21,7 +21,7 @@ public class DataInitializer implements CommandLineRunner {
   private static final String[] INSTRUCTORS = {"김강사", "이강사", "박강사"};
   private static final String[] TITLES = {"스프링", "JPA ", "Java "};
   private static final String[] BOOK_TITLES = {"웹개발", "백엔드", "C+", "C++", "리액트"};
-  private static final String[] TAGS = {"데브옵", "알고리", "데이터", "프론트"};
+  private static final String[] TAGS = {"데브옵", "알고리즘", "데이터", "프론트"};
 
   private final ActivityRepository activityRepository;
   private final UserRepository userRepository;
