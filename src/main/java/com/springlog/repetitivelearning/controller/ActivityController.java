@@ -137,7 +137,7 @@ public class ActivityController {
   public ResponseEntity<CountCategoryResponse> getCountByCategory(
       @RequestParam(required = false) Visibility visibility
   ) {
-    CountCategoryResponse countCategoryResponse = dashboard.countByCategroy(visibility);
+    CountCategoryResponse countCategoryResponse = dashboard.countByCategory(visibility);
 
     return ResponseEntity.status(HttpStatus.OK).body(countCategoryResponse);
   }

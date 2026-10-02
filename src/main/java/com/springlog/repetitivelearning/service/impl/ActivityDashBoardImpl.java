@@ -57,7 +57,7 @@ public class ActivityDashBoardImpl implements ActivityDashboard {
   }
 
   @Override
-  public CountCategoryResponse countByCategroy(Visibility visibility) {
+  public CountCategoryResponse countByCategory(Visibility visibility) {
 
     Map<ActivityCategory, Long> countCategory = new EnumMap<>(ActivityCategory.class);
 
@@ -68,7 +68,7 @@ public class ActivityDashBoardImpl implements ActivityDashboard {
       countCategory.put(category, 0L);
     }
 
-    long total = countCategory.size();
+    long total = activities.size();
 
     for (LearningActivity activity : activities) {
       countCategory.merge(activity.getCategory(), 1L, Long::sum);

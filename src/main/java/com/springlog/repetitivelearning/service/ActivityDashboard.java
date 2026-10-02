@@ -12,7 +12,7 @@ public interface ActivityDashboard {
 
   List<ActivityResponse> findByTag(String tag, Visibility visibility);
   Map<ActivityCategory, List<ActivityResponse>> groupByCategory(Visibility visibility);
-  CountCategoryResponse countByCategroy(Visibility visibility);
+  CountCategoryResponse countByCategory(Visibility visibility);
   Set<String> sortByAllTags(Visibility visibility);
 
 }
