@@ -3,7 +3,9 @@ package com.springlog.repetitivelearning.controller;
 import com.springlog.repetitivelearning.domain.type.ActivityCategory;
 import com.springlog.repetitivelearning.domain.type.Visibility;
 import com.springlog.repetitivelearning.dto.request.AddTagsRequest;
+import com.springlog.repetitivelearning.dto.request.ChangeTitleRequest;
 import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
+import com.springlog.repetitivelearning.dto.request.IncreaseMinutesRequest;
 import com.springlog.repetitivelearning.dto.request.PagingRequest;
 import com.springlog.repetitivelearning.dto.request.SearchRequest;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
@@ -13,16 +15,17 @@ import com.springlog.repetitivelearning.dto.response.SliceResponse;
 import com.springlog.repetitivelearning.service.ActivityDashboard;
 import com.springlog.repetitivelearning.service.ActivityService;
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,15 +43,18 @@ public class ActivityController {
 
   @PostMapping
   public ResponseEntity<ActivityResponse> createActivity(
-      @RequestBody @Valid CreateActivityRequest request){
+      @RequestBody @Valid CreateActivityRequest request) {
     ActivityResponse activity = activityService.createActivity(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(activity);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ActivityResponse> getActivityById(@PathVariable Long id){
+  public ResponseEntity<ActivityResponse> getActivityById(@PathVariable Long id) {
     ActivityResponse activity = activityService.getActivity(id);
-    return ResponseEntity.status(HttpStatus.OK).body(activity);
+
+    URI location = URI.create("/api/activities/" + activity.id());
+
+    return ResponseEntity.created(location).body(activity);
   }
 
   @GetMapping
@@ -61,7 +67,7 @@ public class ActivityController {
   //tags
   @PostMapping("/{activityId}/tags")
   public ResponseEntity<ActivityResponse> addTags(
-      @PathVariable Long activityId , @RequestBody @Valid AddTagsRequest request){
+      @PathVariable Long activityId, @RequestBody @Valid AddTagsRequest request) {
     ActivityResponse activity = activityService.addTags(activityId, request);
 
     return ResponseEntity.status(HttpStatus.OK).body(activity);
@@ -70,8 +76,8 @@ public class ActivityController {
 
   @GetMapping("/{activityId}/tags/{tag}")
   public ResponseEntity<Boolean> existenceTag(
-      @PathVariable Long activityId ,
-      @PathVariable String tag){
+      @PathVariable Long activityId,
+      @PathVariable String tag) {
     boolean existenceTag = activityService.tagExistence(activityId, tag);
 
     return ResponseEntity.status(HttpStatus.OK).body(existenceTag);
@@ -79,7 +85,7 @@ public class ActivityController {
 
   @DeleteMapping("/{activityId}/tags/{tag}")
   public ResponseEntity<Void> deleteTag(
-      @PathVariable Long activityId , @PathVariable String tag
+      @PathVariable Long activityId, @PathVariable String tag
   ) {
     activityService.deleteTag(activityId, tag);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -126,7 +132,7 @@ public class ActivityController {
   @GetMapping("/group/category")
   public ResponseEntity<Map<ActivityCategory, List<ActivityResponse>>> getGroupByCategory(
       @RequestParam(required = false) Visibility visibility
-  ){
+  ) {
     Map<ActivityCategory, List<ActivityResponse>> categoryListMap =
         dashboard.groupByCategory(visibility);
 
@@ -143,10 +149,45 @@ public class ActivityController {
   }
 
   @GetMapping("/sort/all/tags")
-  public ResponseEntity<Set<String>>  getAllTags(
+  public ResponseEntity<Set<String>> getAllTags(
       @RequestParam(required = false) Visibility visibility
   ) {
     Set<String> sortAllTags = dashboard.sortByAllTags(visibility);
     return ResponseEntity.status(HttpStatus.OK).body(sortAllTags);
+  }
+
+  //Chenge
+
+  @PatchMapping("/{activityId}/title")
+  public ResponseEntity<ActivityResponse> updateTitle(
+      @PathVariable Long activityId, @RequestBody @Valid ChangeTitleRequest request ) {
+    ActivityResponse activity = activityService.changeTitle(activityId, request);
+    return ResponseEntity.status(HttpStatus.OK).body(activity);
+  }
+
+  @PatchMapping("{activityId}/minutes")
+  public ResponseEntity<ActivityResponse> updateMinutes(
+      @PathVariable Long activityId, @RequestBody @Valid IncreaseMinutesRequest request ) {
+    ActivityResponse activityResponse = activityService.incraseMinutes(activityId, request);
+
+    return ResponseEntity.status(HttpStatus.OK).body(activityResponse);
+  }
+
+  @PatchMapping("{activityId}/public")
+  public ResponseEntity<ActivityResponse> updatePublic(@PathVariable Long activityId ) {
+    ActivityResponse activityResponse = activityService.chabgeToPublic(activityId);
+    return ResponseEntity.status(HttpStatus.OK).body(activityResponse);
+  }
+
+  @PatchMapping("{activityId}/private")
+  public ResponseEntity<ActivityResponse> updatePrivate(@PathVariable Long activityId ) {
+    ActivityResponse activityResponse = activityService.chabgeToPrivate(activityId);
+    return ResponseEntity.status(HttpStatus.OK).body(activityResponse);
+  }
+
+  @DeleteMapping("{activityId}")
+  public ResponseEntity<Void> deleteActivity(@PathVariable Long activityId) {
+    activityService.deleteActivity(activityId);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

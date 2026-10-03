@@ -2,7 +2,9 @@ package com.springlog.repetitivelearning.service;
 
 import com.springlog.repetitivelearning.domain.type.Visibility;
 import com.springlog.repetitivelearning.dto.request.AddTagsRequest;
+import com.springlog.repetitivelearning.dto.request.ChangeTitleRequest;
 import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
+import com.springlog.repetitivelearning.dto.request.IncreaseMinutesRequest;
 import com.springlog.repetitivelearning.dto.request.PagingRequest;
 import com.springlog.repetitivelearning.dto.request.SearchRequest;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
@@ -27,4 +29,10 @@ public interface ActivityService {
 
   List<ActivityResponse> getAllPublicActivities(SearchRequest searchRequest);
 
+  ActivityResponse changeTitle(Long activityId, ChangeTitleRequest request);
+  ActivityResponse incraseMinutes(Long activityId, IncreaseMinutesRequest request);
+  ActivityResponse chabgeToPublic(Long activityId);
+  ActivityResponse chabgeToPrivate(Long activityId);
+
+  void deleteActivity(Long activityId);
 }

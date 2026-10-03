@@ -8,7 +8,9 @@ import com.springlog.repetitivelearning.domain.LearningActivity;
 import com.springlog.repetitivelearning.domain.User;
 import com.springlog.repetitivelearning.domain.type.Visibility;
 import com.springlog.repetitivelearning.dto.request.AddTagsRequest;
+import com.springlog.repetitivelearning.dto.request.ChangeTitleRequest;
 import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
+import com.springlog.repetitivelearning.dto.request.IncreaseMinutesRequest;
 import com.springlog.repetitivelearning.dto.request.PagingRequest;
 import com.springlog.repetitivelearning.dto.request.SearchRequest;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
@@ -157,6 +159,65 @@ public class ActivityServiceImpl implements ActivityService {
 
     return activityRepository.findByVisibility(visibility).stream()
         .map(ActivityResponse::from).toList();
+  }
+
+  @Override
+  @Transactional
+  public ActivityResponse changeTitle(Long activityId, ChangeTitleRequest request) {
+
+    LearningActivity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    activity.changeTitle(request.title());
+    LearningActivity saved = activityRepository.save(activity);
+
+    return ActivityResponse.from(saved);
+  }
+
+  @Override
+  @Transactional
+  public ActivityResponse incraseMinutes(Long activityId, IncreaseMinutesRequest request) {
+
+    LearningActivity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    activity.increaseMinutes(request.minutes());
+    LearningActivity saved = activityRepository.save(activity);
+
+    return ActivityResponse.from(saved);
+  }
+
+  @Override
+  public ActivityResponse chabgeToPublic(Long activityId) {
+
+    LearningActivity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    activity.changeToPublic();
+    LearningActivity saved = activityRepository.save(activity);
+
+    return ActivityResponse.from(saved);
+  }
+
+  @Override
+  public ActivityResponse chabgeToPrivate(Long activityId) {
+    LearningActivity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    activity.changeToPrivate();
+    LearningActivity saved = activityRepository.save(activity);
+
+    return ActivityResponse.from(saved);
+  }
+
+  @Override
+  public void deleteActivity(Long activityId) {
+
+    LearningActivity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    activityRepository.delete(activity);
+
   }
 
 }
