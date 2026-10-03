@@ -11,7 +11,7 @@
 ## [설계 의도와 빌드 순서]
 - 우선 로케이션 헤더(위치 정보)를 추가하기 위해서 ActivityController에 createActivity 매서드를 리페터링한다.
   <br> URI location = URI.create("/api/activities/" + activity.id());의 형태로 만들 수 있다. 응답에는 Http를 만드는 부분을 지우고 <br>ResponseEntity.created(location).body(activity);로 반환한다.
-- 서비스 로직 구현 [본문으로 보냐는 값이 여러개이거나, Valid 검증이 필요하다면 Dto 신설 ]
+- 서비스 로직 구현 [본문으로 보내는 값이 여러개이거나, Valid 검증이 필요하다면 Dto 신설 ]
   멱등성이 있는 요청은  @PatchMapping[title,visibility]/ 멱등성이 없는 요청은 @PostMapping [minutes]
 -
 
