@@ -45,16 +45,15 @@ public class ActivityController {
   public ResponseEntity<ActivityResponse> createActivity(
       @RequestBody @Valid CreateActivityRequest request) {
     ActivityResponse activity = activityService.createActivity(request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(activity);
+    URI location = URI.create("/api/activities/" + activity.id());
+    return ResponseEntity.created(location).body(activity);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<ActivityResponse> getActivityById(@PathVariable Long id) {
     ActivityResponse activity = activityService.getActivity(id);
 
-    URI location = URI.create("/api/activities/" + activity.id());
-
-    return ResponseEntity.created(location).body(activity);
+    return ResponseEntity.status(HttpStatus.OK).body(activity);
   }
 
   @GetMapping
@@ -156,7 +155,7 @@ public class ActivityController {
     return ResponseEntity.status(HttpStatus.OK).body(sortAllTags);
   }
 
-  //Chenge
+  //Change
 
   @PatchMapping("/{activityId}/title")
   public ResponseEntity<ActivityResponse> updateTitle(
@@ -165,27 +164,27 @@ public class ActivityController {
     return ResponseEntity.status(HttpStatus.OK).body(activity);
   }
 
-  @PatchMapping("{activityId}/minutes")
+  @PostMapping("/{activityId}/minutes")
   public ResponseEntity<ActivityResponse> updateMinutes(
       @PathVariable Long activityId, @RequestBody @Valid IncreaseMinutesRequest request ) {
-    ActivityResponse activityResponse = activityService.incraseMinutes(activityId, request);
+    ActivityResponse activityResponse = activityService.increaseMinutes(activityId, request);
 
     return ResponseEntity.status(HttpStatus.OK).body(activityResponse);
   }
 
-  @PatchMapping("{activityId}/public")
+  @PatchMapping("/{activityId}/public")
   public ResponseEntity<ActivityResponse> updatePublic(@PathVariable Long activityId ) {
-    ActivityResponse activityResponse = activityService.chabgeToPublic(activityId);
+    ActivityResponse activityResponse = activityService.changeToPublic(activityId);
     return ResponseEntity.status(HttpStatus.OK).body(activityResponse);
   }
 
-  @PatchMapping("{activityId}/private")
+  @PatchMapping("/{activityId}/private")
   public ResponseEntity<ActivityResponse> updatePrivate(@PathVariable Long activityId ) {
-    ActivityResponse activityResponse = activityService.chabgeToPrivate(activityId);
+    ActivityResponse activityResponse = activityService.changeToPrivate(activityId);
     return ResponseEntity.status(HttpStatus.OK).body(activityResponse);
   }
 
-  @DeleteMapping("{activityId}")
+  @DeleteMapping("/{activityId}")
   public ResponseEntity<Void> deleteActivity(@PathVariable Long activityId) {
     activityService.deleteActivity(activityId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

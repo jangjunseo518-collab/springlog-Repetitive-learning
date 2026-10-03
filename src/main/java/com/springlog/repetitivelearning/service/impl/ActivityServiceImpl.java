@@ -176,7 +176,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   @Transactional
-  public ActivityResponse incraseMinutes(Long activityId, IncreaseMinutesRequest request) {
+  public ActivityResponse increaseMinutes(Long activityId, IncreaseMinutesRequest request) {
 
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
@@ -188,7 +188,8 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public ActivityResponse chabgeToPublic(Long activityId) {
+  @Transactional
+  public ActivityResponse changeToPublic(Long activityId) {
 
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
@@ -200,7 +201,8 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public ActivityResponse chabgeToPrivate(Long activityId) {
+  @Transactional
+  public ActivityResponse changeToPrivate(Long activityId) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
 
@@ -211,6 +213,7 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  @Transactional
   public void deleteActivity(Long activityId) {
 
     LearningActivity activity = activityRepository.findById(activityId)
