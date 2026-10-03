@@ -8,7 +8,9 @@ import com.springlog.repetitivelearning.domain.LearningActivity;
 import com.springlog.repetitivelearning.domain.User;
 import com.springlog.repetitivelearning.domain.type.Visibility;
 import com.springlog.repetitivelearning.dto.request.AddTagsRequest;
+import com.springlog.repetitivelearning.dto.request.ChangeTitleRequest;
 import com.springlog.repetitivelearning.dto.request.CreateActivityRequest;
+import com.springlog.repetitivelearning.dto.request.IncreaseMinutesRequest;
 import com.springlog.repetitivelearning.dto.request.PagingRequest;
 import com.springlog.repetitivelearning.dto.request.SearchRequest;
 import com.springlog.repetitivelearning.dto.response.ActivityResponse;
@@ -19,7 +21,6 @@ import com.springlog.repetitivelearning.exception.OwnerNotFoundException;
 import com.springlog.repetitivelearning.repository.ActivityRepository;
 import com.springlog.repetitivelearning.repository.UserRepository;
 import com.springlog.repetitivelearning.service.ActivityService;
-import com.springlog.repetitivelearning.service.helper.VisibilityValidator;
 import com.springlog.repetitivelearning.service.helper.paging.PagingSetup;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -157,6 +158,68 @@ public class ActivityServiceImpl implements ActivityService {
 
     return activityRepository.findByVisibility(visibility).stream()
         .map(ActivityResponse::from).toList();
+  }
+
+  @Override
+  @Transactional
+  public ActivityResponse changeTitle(Long activityId, ChangeTitleRequest newTitle) {
+
+    LearningActivity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    activity.changeTitle(newTitle.title());
+    LearningActivity saved = activityRepository.save(activity);
+
+    return ActivityResponse.from(saved);
+  }
+
+  @Override
+  @Transactional
+  public ActivityResponse changeToPublic(Long activityId) {
+
+    LearningActivity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    activity.changeToPublic();
+    LearningActivity saved = activityRepository.save(activity);
+
+
+    return ActivityResponse.from(saved);
+  }
+
+  @Override
+  @Transactional
+  public ActivityResponse changeToPrivate(Long activityId) {
+    LearningActivity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    activity.changeToPrivate();
+    LearningActivity saved = activityRepository.save(activity);
+
+
+    return ActivityResponse.from(saved);
+  }
+
+
+  @Override
+  @Transactional
+  public ActivityResponse increaseMinutes(Long activityId, IncreaseMinutesRequest additionMinutes) {
+
+    LearningActivity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    activity.increaseMinutes(additionMinutes.minutes());
+    LearningActivity saved = activityRepository.save(activity);
+
+    return ActivityResponse.from(saved);
+  }
+
+  @Override
+  @Transactional
+  public void deleteActivity(Long activityId) {
+    LearningActivity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+    activityRepository.delete(activity);
   }
 
 }
