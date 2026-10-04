@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -161,7 +160,7 @@ public class ActivityController {
   @PatchMapping("/{activityId}/title")
   public ResponseEntity<ActivityResponse> updateTitle(@PathVariable Long activityId,
       @RequestBody @Valid ChangeTitleRequest request) {
-    ActivityResponse activityResponse = activityService.changTitle(activityId, request);
+    ActivityResponse activityResponse = activityService.changeTitle(activityId, request);
     return ResponseEntity.status(HttpStatus.OK).body(activityResponse);
   }
 

@@ -163,7 +163,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   @Transactional
-  public ActivityResponse changTitle(Long activityId, ChangeTitleRequest request) {
+  public ActivityResponse changeTitle(Long activityId, ChangeTitleRequest request) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
 
