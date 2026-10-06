@@ -39,6 +39,9 @@ public class LearningActivity extends BasicEntity {
 
   private LocalDate studiedOn;
 
+  @Column(length = 100)
+  private String attachmentFileName;
+
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "activity_tags",  joinColumns = @JoinColumn(name = "activity_id"))
   @Column(name = "tag")
@@ -72,6 +75,10 @@ public class LearningActivity extends BasicEntity {
     this.instructorName = instructorNameNormalization(category, instructorName);
     this.completionRate = completionRateNormalization(category, completionRate);
     this.bookTitle = bookTitleNormalization(category, bookTitle);
+  }
+
+  public void attachFile(String savedFileName) {
+    this.attachmentFileName = savedFileName;
   }
 
   public void assignOwner(User owner) {

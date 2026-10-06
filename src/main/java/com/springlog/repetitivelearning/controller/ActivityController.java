@@ -14,13 +14,16 @@ import com.springlog.repetitivelearning.dto.response.PageResponse;
 import com.springlog.repetitivelearning.dto.response.SliceResponse;
 import com.springlog.repetitivelearning.service.ActivityDashboard;
 import com.springlog.repetitivelearning.service.ActivityService;
+import com.springlog.repetitivelearning.service.file.FileStorage;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +34,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/activities")
@@ -41,10 +46,13 @@ public class ActivityController {
   private final ActivityService activityService;
   private final ActivityDashboard dashboard;
 
-  @PostMapping
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ActivityResponse> createActivity(
-      @RequestBody @Valid CreateActivityRequest request){
-    ActivityResponse activity = activityService.createActivity(request);
+      @RequestPart("data") @Valid CreateActivityRequest request,
+      @RequestPart(value = "file", required = false) MultipartFile file ) {
+
+    ActivityResponse activity = activityService.createActivity(
+                               request, file);
 
     URI location = URI.create("/api/activities/" + activity.id());
 
@@ -189,5 +197,29 @@ public class ActivityController {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
+  @GetMapping("/{activityId}/attachment")
+  public ResponseEntity<Void> getAttachment(@PathVariable Long activityId) {
+    Optional<String> attachmentUrl = activityService.getAttachmentUrl(activityId);
 
+    if (attachmentUrl.isPresent()) {
+      return ResponseEntity.status(HttpStatus.FOUND)
+          .location(URI.create(attachmentUrl.get()))
+          .build();
+    } else {
+      return ResponseEntity.notFound().build();
+    }
+  }
+
+  @GetMapping("/{activityId}/attachment/download")
+  public ResponseEntity<Void> downloadAttachment(@PathVariable Long activityId) {
+    Optional<String> downloadUrl = activityService.getAttachmentDownloadUrl(activityId);
+
+    if (downloadUrl.isPresent()) {
+      return ResponseEntity.status(HttpStatus.FOUND)
+          .location(URI.create(downloadUrl.get()))
+          .build();
+    }else  {
+      return ResponseEntity.notFound().build();
+    }
+  }
 }

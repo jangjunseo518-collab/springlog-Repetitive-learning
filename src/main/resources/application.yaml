@@ -4,5 +4,11 @@ spring:
   profiles:
     active: dev
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB     # 파일 하나의 최대 크기
+      max-request-size: 20MB # 요청 전체(파일 여러 개 + JSON 부분)의 최대 크기
+
 server:
   port: 8080
