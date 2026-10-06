@@ -18,9 +18,11 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +33,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/activities")
@@ -41,10 +45,11 @@ public class ActivityController {
   private final ActivityService activityService;
   private final ActivityDashboard dashboard;
 
-  @PostMapping
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ActivityResponse> createActivity(
-      @RequestBody @Valid CreateActivityRequest request){
-    ActivityResponse activity = activityService.createActivity(request);
+      @RequestPart("data") @Valid CreateActivityRequest request,
+      @RequestPart(value = "file", required = false) MultipartFile file) {
+    ActivityResponse activity = activityService.createActivity(request, file);
 
     URI location = URI.create("/api/activities/" + activity.id());
 
@@ -52,7 +57,7 @@ public class ActivityController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ActivityResponse> getActivityById(@PathVariable Long id){
+  public ResponseEntity<ActivityResponse> getActivityById(@PathVariable Long id) {
     ActivityResponse activity = activityService.getActivity(id);
     return ResponseEntity.status(HttpStatus.OK).body(activity);
   }
@@ -67,7 +72,7 @@ public class ActivityController {
   //tags
   @PostMapping("/{activityId}/tags")
   public ResponseEntity<ActivityResponse> addTags(
-      @PathVariable Long activityId , @RequestBody @Valid AddTagsRequest request){
+      @PathVariable Long activityId, @RequestBody @Valid AddTagsRequest request) {
     ActivityResponse activity = activityService.addTags(activityId, request);
 
     return ResponseEntity.status(HttpStatus.OK).body(activity);
@@ -76,8 +81,8 @@ public class ActivityController {
 
   @GetMapping("/{activityId}/tags/{tag}")
   public ResponseEntity<Boolean> existenceTag(
-      @PathVariable Long activityId ,
-      @PathVariable String tag){
+      @PathVariable Long activityId,
+      @PathVariable String tag) {
     boolean existenceTag = activityService.tagExistence(activityId, tag);
 
     return ResponseEntity.status(HttpStatus.OK).body(existenceTag);
@@ -85,7 +90,7 @@ public class ActivityController {
 
   @DeleteMapping("/{activityId}/tags/{tag}")
   public ResponseEntity<Void> deleteTag(
-      @PathVariable Long activityId , @PathVariable String tag
+      @PathVariable Long activityId, @PathVariable String tag
   ) {
     activityService.deleteTag(activityId, tag);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -132,7 +137,7 @@ public class ActivityController {
   @GetMapping("/group/category")
   public ResponseEntity<Map<ActivityCategory, List<ActivityResponse>>> getGroupByCategory(
       @RequestParam(required = false) Visibility visibility
-  ){
+  ) {
     Map<ActivityCategory, List<ActivityResponse>> categoryListMap =
         dashboard.groupByCategory(visibility);
 
@@ -149,7 +154,7 @@ public class ActivityController {
   }
 
   @GetMapping("/sort/all/tags")
-  public ResponseEntity<Set<String>>  getAllTags(
+  public ResponseEntity<Set<String>> getAllTags(
       @RequestParam(required = false) Visibility visibility
   ) {
     Set<String> sortAllTags = dashboard.sortByAllTags(visibility);
@@ -189,5 +194,29 @@ public class ActivityController {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
+  @GetMapping("/{activityId}/attachment")
+  public ResponseEntity<Void> getAttachment(@PathVariable Long activityId) {
+    Optional<String> attachmentUrl = activityService.getAttachmentUrl(activityId);
+    if (attachmentUrl.isPresent()) {
+      return ResponseEntity.status(HttpStatus.FOUND)
+          .location(URI.create(attachmentUrl.get()))
+          .build();
+    } else {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .build();
+    }
+  }
 
+  @GetMapping("/{activityId}/attachment/download")
+  public ResponseEntity<Void> getDownloadAttachmentUrl(@PathVariable Long activityId) {
+    Optional<String> attachmentDownloadUrl = activityService.getAttachmentDownloadUrl(activityId);
+    if(attachmentDownloadUrl.isPresent()) {
+      return ResponseEntity.status(HttpStatus.FOUND)
+          .location(URI.create(attachmentDownloadUrl.get()))
+          .build();
+    }else {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .build();
+    }
+  }
 }

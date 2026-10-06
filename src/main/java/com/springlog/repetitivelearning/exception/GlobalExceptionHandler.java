@@ -73,6 +73,19 @@ public class GlobalExceptionHandler {
     return problemDetail;
   }
 
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ProblemDetail handleIllegalArgument(IllegalArgumentException e) {
+    log.warn("잘못된 요청: {}", e.getMessage());
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        HttpStatus.BAD_REQUEST, e.getMessage()
+    );
+    problemDetail.setTitle("잘 못된 요청");
+    problemDetail.setProperty("발생 시간", Instant.now().atZone(
+        ZoneId.of("Asia/Seoul")
+    ));
+    return problemDetail;
+  }
+
   @ExceptionHandler(Exception.class)
   public ProblemDetail handleException(Exception e) {
     log.error("예상 못한 예외 발생", e);

@@ -21,15 +21,20 @@ import com.springlog.repetitivelearning.exception.OwnerNotFoundException;
 import com.springlog.repetitivelearning.repository.ActivityRepository;
 import com.springlog.repetitivelearning.repository.UserRepository;
 import com.springlog.repetitivelearning.service.ActivityService;
+import com.springlog.repetitivelearning.service.file.FileStorage;
 import com.springlog.repetitivelearning.service.helper.VisibilityValidator;
 import com.springlog.repetitivelearning.service.helper.paging.PagingSetup;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -37,10 +42,12 @@ public class ActivityServiceImpl implements ActivityService {
 
   private final ActivityRepository activityRepository;
   private final UserRepository userRepository;
+  private final FileStorage fileStorage;
 
   @Override
   @Transactional
-  public ActivityResponse createActivity(CreateActivityRequest request) {
+  public ActivityResponse createActivity(
+      CreateActivityRequest request, MultipartFile file) {
     Long ownerId = request.ownerId();
     User owner = userRepository.findById(ownerId).orElseThrow(
         () -> new OwnerNotFoundException(ownerId)
@@ -49,7 +56,14 @@ public class ActivityServiceImpl implements ActivityService {
     LearningActivity activity = new LearningActivity(request.title(), request.minutes(),
         request.studiedOn(), request.visibility(), request.category(),
         request.instructorName(), request.completionRate(), request.bookTitle());
+
     activity.assignOwner(owner);
+
+    if(file != null &&  !file.isEmpty()) {
+      String savedFile = fileStorage.saveFile(file);
+      activity.attachFile(savedFile);
+    }
+
     LearningActivity saved = activityRepository.save(activity);
 
     return ActivityResponse.from(saved);
@@ -208,7 +222,38 @@ public class ActivityServiceImpl implements ActivityService {
   public void deleteActivity(Long activityId) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    String storedName = activity.getAttachmentFileName();
+    fileStorage.deleteFile(storedName);
+
     activityRepository.delete(activity);
+    log.info("활동 삭제 완료 id: {}", activityId);
+
+  }
+
+  @Override
+  public Optional<String> getAttachmentUrl(Long activityId) {
+    return findStoredName(activityId).map(fileStorage::getFileUrl);
+  }
+
+  @Override
+  public Optional<String> getAttachmentDownloadUrl(Long activityId) {
+    return findStoredName(activityId).map(fileStorage::getDownloadUrl);
+  }
+
+  //파일명 반환기
+  private Optional<String> findStoredName(Long activityId) {
+    LearningActivity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    String storedName = activity.getAttachmentFileName();
+
+    if(storedName == null || storedName.trim().isEmpty()) {
+      return Optional.empty();
+    }
+
+    return Optional.of(storedName);
+
   }
 
 }
