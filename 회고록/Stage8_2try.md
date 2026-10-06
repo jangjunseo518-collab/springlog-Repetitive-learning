@@ -19,15 +19,29 @@
 - 컨트롤러 구현
 
 ## [아쉬운 점]
->이번 stage` `/ ` `TRY에서 느낀 어려운 점이나 배운 점을 기록한다.
+>이번 stage`8`/ `2`TRY에서 느낀 어려운 점이나 배운 점을 기록한다.
 
-### [느낀 점] :
+### [느낀 점] : 노션에 꽤나 의존해서 빌드했다. 다음 트라이는 코드 보다는 줄글을 보고 글을 보기 전, 무엇이 필요한지 요구사항을 보고서 먼저 떠올려본 뒤, 구현 방법을 모르는 걸 찾아보자.
 <br>
 
 ```angular2html
-오류 코드 예시.
+[LocalFileStorage]
+private final Path uploadPath;
+
+public LocalFileStorage(
+@Value("${sprintlog.file-directory}") String uploadPathByYam) {
+this.uploadPath = Paths.get(uploadPathByYam)
+.toAbsolutePath().normalize();
+try {
+Files.createDirectories(uploadPath);
+log.info("업로드 디렉터리 준비 완료: {}", uploadPath);
+}catch (IOException e) {
+throw new FileStorageException("업로드 디렉토리 생성 실패: " +  uploadPathByYam);
+}
+    }
 ```
-- [오류1]:
+- [오류1]: 생성자에서 예와가 발생할 때 IOException 예외 객체 e를 사용 안 하고있음 이러면 causeBy:가 로그에 안 생김.
+- throw new FileStorageException("업로드 디렉토리 생성 실패: " +  uploadPathByYam, `e` );를 추가해서 예외 객체를 활용하자.
 
 ```angular2html
 오류 코드 예시.
@@ -39,7 +53,7 @@
 <br><br><br>
 
 > ## [긍정 평가]
-> - 내용작성
+> - 노션을 참고하긴 했지만, 무엇이 왜 필요하고 어떤 역할을 하는지 이해할 수 있는 것을 확인함.
 ---
 
 

@@ -33,7 +33,7 @@ public class LocalFileStorage implements FileStorage{
       Files.createDirectories(uploadPath);
       log.info("업로드 디렉터리 준비 완료: {}", uploadPath);
     }catch (IOException e) {
-      throw new FileStorageException("업로드 디렉토리 생성 실패: " +  uploadPathByYam);
+      throw new FileStorageException("업로드 디렉토리 생성 실패: " +  uploadPathByYam, e);
     }
   }
 
@@ -67,7 +67,7 @@ public class LocalFileStorage implements FileStorage{
 
     if(!targetPath.startsWith(uploadPath)) {
       throw new FileStorageException(
-          "저장 경로가 업데이트 디렉터리 외부입니다. 경로:" + targetPath);
+          "저장 경로가 업로드 디렉터리 외부입니다. 경로:" + targetPath);
     }
 
     try{
@@ -77,7 +77,7 @@ public class LocalFileStorage implements FileStorage{
       return savedFileName;
     }catch (IOException e) {
       throw new FileStorageException(
-          "파일 저장 실패" + originalFilename, e
+          "파일 저장 실패: " + originalFilename, e
       );
     }
 
