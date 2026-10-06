@@ -18,9 +18,11 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +33,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/activities")
@@ -41,10 +45,11 @@ public class ActivityController {
   private final ActivityService activityService;
   private final ActivityDashboard dashboard;
 
-  @PostMapping
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ActivityResponse> createActivity(
-      @RequestBody @Valid CreateActivityRequest request){
-    ActivityResponse activity = activityService.createActivity(request);
+      @RequestPart("data") @Valid CreateActivityRequest request,
+      @RequestPart(value = "file", required = false)MultipartFile file){
+    ActivityResponse activity = activityService.createActivity(request, file);
 
     URI location = URI.create("/api/activities/" + activity.id());
 
@@ -187,6 +192,34 @@ public class ActivityController {
   public ResponseEntity<Void> deleteActivity(@PathVariable Long activityId) {
     activityService.deleteActivity(activityId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @GetMapping("/{activityId}/attachment")
+  public ResponseEntity<Void> getAttachmentUrl(@PathVariable Long activityId) {
+    Optional<String> fileName = activityService.findAttachmentUrl(activityId);
+
+    if(fileName.isPresent()) {
+      return ResponseEntity.status(HttpStatus.FOUND)
+          .location(URI.create(fileName.get()))
+          .build();
+    }else {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .build();
+    }
+  }
+
+  @GetMapping("/{activityId}/attachment/download")
+  public ResponseEntity<Void> getDownloadUrl(@PathVariable Long activityId) {
+    Optional<String> fileName = activityService.findDownloadUrl(activityId);
+
+    if (fileName.isPresent()) {
+      return ResponseEntity.status(HttpStatus.FOUND)
+          .location(URI.create(fileName.get()))
+          .build();
+    } else {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .build();
+    }
   }
 
 

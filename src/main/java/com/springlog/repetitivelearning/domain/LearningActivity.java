@@ -39,6 +39,9 @@ public class LearningActivity extends BasicEntity {
 
   private LocalDate studiedOn;
 
+  @Column(length = 100)
+  private String attachmentFile;
+
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "activity_tags",  joinColumns = @JoinColumn(name = "activity_id"))
   @Column(name = "tag")
@@ -79,6 +82,10 @@ public class LearningActivity extends BasicEntity {
       throw new IllegalArgumentException("유저를 입력해 주세요.");
     }
     this.owner = owner;
+  }
+
+  public void attachmentFile(String storageFilename) {
+    this.attachmentFile = storageFilename;
   }
 
   //========== 제목, 학습 시간 유효성 검증

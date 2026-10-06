@@ -10,10 +10,12 @@ import com.springlog.repetitivelearning.dto.response.ActivityResponse;
 import com.springlog.repetitivelearning.dto.response.PageResponse;
 import com.springlog.repetitivelearning.dto.response.SliceResponse;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface ActivityService {
 
-  ActivityResponse createActivity(CreateActivityRequest request);
+  ActivityResponse createActivity(CreateActivityRequest request, MultipartFile file);
 
   ActivityResponse getActivity(Long activityId);
 
@@ -33,5 +35,9 @@ public interface ActivityService {
   ActivityResponse changeToPublic(Long activityId);
   ActivityResponse changeToPrivate(Long activityId);
   void deleteActivity(Long activityId);
+
+  Optional<String> findAttachmentUrl(Long activityId);
+  Optional<String> findDownloadUrl(Long activityId);
+
 
 }

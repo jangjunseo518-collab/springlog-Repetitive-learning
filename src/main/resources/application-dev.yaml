@@ -6,3 +6,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
+
+sprintlog:
+  file-directory: /Users/jangjunseo/Desktop/실무 실습/upload
