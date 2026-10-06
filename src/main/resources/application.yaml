@@ -3,6 +3,10 @@ spring:
     name: springlog-repetitive-learning
   profiles:
     active: dev
-
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 20MB
 server:
   port: 8080
