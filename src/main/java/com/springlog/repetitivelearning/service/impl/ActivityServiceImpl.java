@@ -22,7 +22,6 @@ import com.springlog.repetitivelearning.repository.ActivityRepository;
 import com.springlog.repetitivelearning.repository.UserRepository;
 import com.springlog.repetitivelearning.service.ActivityService;
 import com.springlog.repetitivelearning.service.file.FileStorage;
-import com.springlog.repetitivelearning.service.helper.VisibilityValidator;
 import com.springlog.repetitivelearning.service.helper.paging.PagingSetup;
 import java.util.List;
 import java.util.Optional;
@@ -230,12 +229,12 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public Optional<String> findAttachmentFileName(Long activityId) {
-    return getStoredFileName(activityId).map(fileStorage::gteFileUrl);
+  public Optional<String> findAttachmentUrl(Long activityId) {
+    return getStoredFileName(activityId).map(fileStorage::getFileUrl);
   }
 
   @Override
-  public Optional<String> findDownloadFileName(Long activityId) {
+  public Optional<String> findDownloadUrl(Long activityId) {
     return getStoredFileName(activityId).map(fileStorage::getDownloadUrl);
   }
 

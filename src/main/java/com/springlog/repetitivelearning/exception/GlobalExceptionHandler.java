@@ -79,7 +79,7 @@ public class GlobalExceptionHandler {
         HttpStatus.BAD_REQUEST, e.getMessage()
     );
 
-    problemDetail.setTitle("잘못돤 입력");
+    problemDetail.setTitle("잘못된 입력");
     problemDetail.setProperty("발생 시간", Instant.now().atZone(
         ZoneId.of("Asia/Seoul")
     ));

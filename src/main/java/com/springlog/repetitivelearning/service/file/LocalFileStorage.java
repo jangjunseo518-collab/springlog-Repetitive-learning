@@ -82,13 +82,13 @@ public class LocalFileStorage implements FileStorage{
   }
 
   @Override
-  public String gteFileUrl(String storedName) {
+  public String getFileUrl(String storedName) {
     return "/api/files/" + storedName;
   }
 
   @Override
   public String getDownloadUrl(String storedName) {
-    return "api/files/download/" + storedName;
+    return "/api/files/download/" + storedName;
   }
 
   @Override
@@ -98,7 +98,7 @@ public class LocalFileStorage implements FileStorage{
       return;
     }
 
-    Path targetPath = uploadPath.resolve(storedName).getFileName().normalize();
+    Path targetPath = uploadPath.resolve(storedName).normalize();
 
     if(!targetPath.startsWith(uploadPath)){
       log.warn("삭제 요청 거부. 업로드 디렉터리 외부 경로:" + targetPath);

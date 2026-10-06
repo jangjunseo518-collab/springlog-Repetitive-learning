@@ -22,9 +22,24 @@
 <br>
 
 ```angular2html
-오류 코드 예시.
+[LocalFileStorage]
+
+@Override
+public void deleteFile(String storedName) {
+
+if(storedName == null || storedName.isEmpty()){
+return;
+}
+
+Path targetPath = uploadPath.resolve(storedName)`.getFileName()`.normalize();
+
+if(!targetPath.startsWith(uploadPath)){
+log.warn("삭제 요청 거부. 업로드 디렉터리 외부 경로:" + targetPath);
+return;
+}
 ```
-- [오류1]:
+- [오류1]:uploadPath.resolve(storedName) -> uploadPath: 업로드 폴더 경로 + .resolve(storedName):파일명을 Path로 변형 + / 추가해서 경로+추가할 파일명을 완성
+<br>근데 그 완성된 걍로에 `.getFileName()`를 하면 다시 uploadPath부분을 제외한 storedName 즉 파일 명만 반환됨 -> `.getFileName()`을 지우워야함: uploadPath.resolve(storedName).normalize();
 
 ```angular2html
 오류 코드 예시.

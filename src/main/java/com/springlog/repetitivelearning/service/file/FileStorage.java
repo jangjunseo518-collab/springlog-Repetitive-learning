@@ -6,7 +6,7 @@ public interface FileStorage {
 
   String saveFile(MultipartFile file);
 
-  String gteFileUrl(String storedName);
+  String getFileUrl(String storedName);
   String getDownloadUrl(String storedName);
 
   void deleteFile(String storedName);

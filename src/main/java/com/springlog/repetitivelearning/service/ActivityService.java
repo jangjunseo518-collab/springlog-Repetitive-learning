@@ -36,8 +36,8 @@ public interface ActivityService {
   ActivityResponse changeToPrivate(Long activityId);
   void deleteActivity(Long activityId);
 
-  Optional<String> findAttachmentFileName(Long activityId);
-  Optional<String> findDownloadFileName(Long activityId);
+  Optional<String> findAttachmentUrl(Long activityId);
+  Optional<String> findDownloadUrl(Long activityId);
 
 
 }

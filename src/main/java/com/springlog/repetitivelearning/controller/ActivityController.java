@@ -196,7 +196,7 @@ public class ActivityController {
 
   @GetMapping("/{activityId}/attachment")
   public ResponseEntity<Void> getAttachmentUrl(@PathVariable Long activityId) {
-    Optional<String> fileName = activityService.findAttachmentFileName(activityId);
+    Optional<String> fileName = activityService.findAttachmentUrl(activityId);
 
     if(fileName.isPresent()) {
       return ResponseEntity.status(HttpStatus.FOUND)
@@ -210,7 +210,7 @@ public class ActivityController {
 
   @GetMapping("/{activityId}/attachment/download")
   public ResponseEntity<Void> getDownloadUrl(@PathVariable Long activityId) {
-    Optional<String> fileName = activityService.findDownloadFileName(activityId);
+    Optional<String> fileName = activityService.findDownloadUrl(activityId);
 
     if (fileName.isPresent()) {
       return ResponseEntity.status(HttpStatus.FOUND)
