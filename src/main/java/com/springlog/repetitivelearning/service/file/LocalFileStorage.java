@@ -57,7 +57,7 @@ public class LocalFileStorage implements FileStorage{
       throw new IllegalArgumentException("허용되지 않은 확장자. 확장자: " + extension);
     }
 
-    String storedFileName = UUID.randomUUID().toString().replaceAll("-", "") + extension;
+    String storedFileName = UUID.randomUUID().toString().replace("-", "") + extension;
 
     Path targetPath = uploadPath.resolve(storedFileName).normalize();
 
