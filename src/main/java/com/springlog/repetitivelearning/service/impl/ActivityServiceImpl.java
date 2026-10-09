@@ -70,10 +70,10 @@ public class ActivityServiceImpl implements ActivityService {
       activity.attachmentFile(savedFile);
     }
 
-    recordAuditLog(ActionCategory.CREATE,
-        "활동 생성", activity);
-
     LearningActivity saved = activityRepository.save(activity);
+
+    recordAuditLog(ActionCategory.CREATE,
+        "활동 생성", saved);
 
     return ActivityResponse.from(saved);
   }
@@ -140,21 +140,22 @@ public class ActivityServiceImpl implements ActivityService {
         () -> new ActivityNotFoundException(activityId)
     );
 
-    Set<String> beforeAddTags = new HashSet<>(activity.getTags());
-    boolean remove = beforeAddTags.remove(tag);
+    Set<String> beforeDeleteTags = new HashSet<>(activity.getTags());
 
-    activity.removeTag(tag);
+    boolean removeTag = activity.removeTag(tag);
 
     Set<String> deleteTags = new HashSet<>(activity.getTags());
 
-    List<String> removedTags = beforeAddTags.stream()
+
+    List<String> removedTags = beforeDeleteTags.stream()
         .filter(t -> !deleteTags.contains(t))
         .toList();
 
-    if(remove) {
+
+    if(removeTag) {
       recordAuditLog(ActionCategory.UPDATE,
           "태그 삭제"
-              + "\n기존 태그: " + beforeAddTags
+              + "\n기존 태그: " + beforeDeleteTags
               + "\n삭제 태그: " + removedTags, activity);
     }
 
@@ -219,13 +220,15 @@ public class ActivityServiceImpl implements ActivityService {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
 
+    String beforeChangeTitle = activity.getTitle();
+
     activity.changeTitle(request.title());
     LearningActivity saved = activityRepository.save(activity);
 
     recordAuditLog(ActionCategory.UPDATE,
         "제목 변경"
-                  +"\n변경 전 제목: " + activity.getTitle()
-                  +"\n뱐걍 후 제목: " + saved.getTitle(), saved);
+                  +"\n변경 전 제목: " + beforeChangeTitle
+                  +"\n변경 후 제목: " + saved.getTitle(), saved);
 
 
     return ActivityResponse.from(saved);
@@ -237,13 +240,15 @@ public class ActivityServiceImpl implements ActivityService {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
 
+    int beforeIncreaseMinutes = activity.getMinutes();
+
     activity.increaseMinutes(request.minutes());
     LearningActivity saved = activityRepository.save(activity);
 
     recordAuditLog(ActionCategory.UPDATE,
                    "학습 시간 증가"
-                            +"기존 학습시간: " + activity.getMinutes()
-                            +"증가 학습시간: " + request.minutes(),saved);
+                            +"\n기존 학습시간: " + beforeIncreaseMinutes
+                            +"\n증가 학습시간: " + request.minutes(),saved);
 
     return ActivityResponse.from(saved);
   }
@@ -253,13 +258,16 @@ public class ActivityServiceImpl implements ActivityService {
   public ActivityResponse changeToPublic(Long activityId) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
-   activity.changeToPublic();
+
+   Visibility beforeChangeToPublic = activity.getVisibility();
+
+    activity.changeToPublic();
     LearningActivity saved = activityRepository.save(activity);
 
     recordAuditLog(ActionCategory.UPDATE,
         "공개 활동으로 변경"
-                 +"기존 공개여부: " + activity.getVisibility()
-                 +"변경 후 공개여부: " +  saved.getVisibility(), saved);
+                 +"\n기존 공개여부: " + beforeChangeToPublic
+                 +"\n변경 후 공개여부: " +  saved.getVisibility(), saved);
 
     return ActivityResponse.from(saved);
   }
@@ -269,13 +277,16 @@ public class ActivityServiceImpl implements ActivityService {
   public ActivityResponse changeToPrivate(Long activityId) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    Visibility beforeChangeToPrivate = activity.getVisibility();
+
     activity.changeToPrivate();
     LearningActivity saved = activityRepository.save(activity);
 
     recordAuditLog(ActionCategory.UPDATE,
         "비공개 활동으로 변경"
-            +"기존 공개여부: " + activity.getVisibility()
-            +"변경 후 공개여부: " +  saved.getVisibility(), saved);
+            +"\n기존 공개여부: " + beforeChangeToPrivate
+            +"\n변경 후 공개여부: " +  saved.getVisibility(), saved);
 
 
     return ActivityResponse.from(saved);
