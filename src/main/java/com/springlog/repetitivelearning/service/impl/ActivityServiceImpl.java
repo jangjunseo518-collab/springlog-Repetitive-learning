@@ -26,14 +26,12 @@ import com.springlog.repetitivelearning.repository.UserRepository;
 import com.springlog.repetitivelearning.service.ActivityService;
 import com.springlog.repetitivelearning.service.file.FileStorage;
 import com.springlog.repetitivelearning.service.helper.paging.PagingSetup;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.audit.AuditLog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -149,13 +147,10 @@ public class ActivityServiceImpl implements ActivityService {
 
     if(removeTag) {
       recordAuditLog(ActionCategory.UPDATE,
-          "태그 삭제"
-                   +"\n삭제 전 태그: " + beforeDeleteTags
-                   +"\n삭제 된 태그: " + deletedTagList, activity);
-
+          "태그 삭재"
+                   +"\n삭재 전 태그: " + beforeDeleteTags
+                   +"\n삭재 된 태그: " + deletedTagList, activity);
     }
-
-
   }
 
   @Override
@@ -223,9 +218,9 @@ public class ActivityServiceImpl implements ActivityService {
     LearningActivity saved = activityRepository.save(activity);
 
     recordAuditLog(ActionCategory.UPDATE,
-        "활동 제목 변경"
-                 +"변경 전 title: " + beforeChangeTitle
-                 +"변경 후 title: " + saved.getTitle(), saved);
+        "활동 재목 변경"
+                 +"\n변경 전 title: " + beforeChangeTitle
+                 +"\n변경 후 title: " + saved.getTitle(), saved);
 
     return ActivityResponse.from(saved);
   }
@@ -236,8 +231,17 @@ public class ActivityServiceImpl implements ActivityService {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
 
+    int beforeIncreaseMinutes = activity.getMinutes();
+
     activity.increaseMinutes(request.minutes());
     LearningActivity saved = activityRepository.save(activity);
+
+    recordAuditLog(ActionCategory.UPDATE,
+        "학습시간 증가"
+                +"\n증가 전 학습 시간: " + beforeIncreaseMinutes
+                +"\n증가 학습 시간: " + request.minutes()
+                +"\n현재 학습 시간: " + saved.getMinutes(), saved);
+
     return ActivityResponse.from(saved);
   }
 
@@ -246,8 +250,17 @@ public class ActivityServiceImpl implements ActivityService {
   public ActivityResponse changeToPublic(Long activityId) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    Visibility beforeChangeToPublic = activity.getVisibility();
+
    activity.changeToPublic();
     LearningActivity saved = activityRepository.save(activity);
+
+    recordAuditLog(ActionCategory.UPDATE,
+        "공개 활동으로 변경"
+                  +"\n기존 공개여부: " + beforeChangeToPublic
+                  +"\n현재 공개여부: " +  saved.getVisibility(), saved);
+
     return ActivityResponse.from(saved);
   }
 
@@ -256,8 +269,17 @@ public class ActivityServiceImpl implements ActivityService {
   public ActivityResponse changeToPrivate(Long activityId) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    Visibility beforeChangeToPrivate = activity.getVisibility();
+
     activity.changeToPrivate();
     LearningActivity saved = activityRepository.save(activity);
+
+    recordAuditLog(ActionCategory.UPDATE,
+    "비공개 활동으로 변경"
+            +"\n변경 전 공개 여부: " + beforeChangeToPrivate
+            +"\n변경 후 공개 여부: " +  saved.getVisibility(), saved);
+
     return ActivityResponse.from(saved);
   }
 
@@ -271,12 +293,12 @@ public class ActivityServiceImpl implements ActivityService {
     fileStorage.deleteFile(attachmentFile);
 
     recordAuditLog(ActionCategory.DELETE,
-        "활동 삭제", activity);
+        "활동 삭재", activity);
 
     activityRepository.delete(activity);
 
 
-    log.info("활동 삭제 완료 id: {} ", activityId);
+    log.info("활동 삭재 완료 id: {} ", activityId);
   }
 
   @Override
