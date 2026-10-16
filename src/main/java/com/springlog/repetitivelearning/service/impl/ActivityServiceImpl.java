@@ -4,8 +4,10 @@ package com.springlog.repetitivelearning.service.impl;
 import static com.springlog.repetitivelearning.service.helper.VisibilityValidator.visibilityPublicValidator;
 import static com.springlog.repetitivelearning.service.helper.paging.PagingHelper.buildPagingSetup;
 
+import com.springlog.repetitivelearning.domain.ActivityAuditLog;
 import com.springlog.repetitivelearning.domain.LearningActivity;
 import com.springlog.repetitivelearning.domain.User;
+import com.springlog.repetitivelearning.domain.type.ActionCategory;
 import com.springlog.repetitivelearning.domain.type.Visibility;
 import com.springlog.repetitivelearning.dto.request.AddTagsRequest;
 import com.springlog.repetitivelearning.dto.request.ChangeTitleRequest;
@@ -19,14 +21,19 @@ import com.springlog.repetitivelearning.dto.response.SliceResponse;
 import com.springlog.repetitivelearning.exception.ActivityNotFoundException;
 import com.springlog.repetitivelearning.exception.OwnerNotFoundException;
 import com.springlog.repetitivelearning.repository.ActivityRepository;
+import com.springlog.repetitivelearning.repository.AuditLogRepository;
 import com.springlog.repetitivelearning.repository.UserRepository;
 import com.springlog.repetitivelearning.service.ActivityService;
 import com.springlog.repetitivelearning.service.file.FileStorage;
 import com.springlog.repetitivelearning.service.helper.paging.PagingSetup;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.audit.AuditLog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -42,6 +49,7 @@ public class ActivityServiceImpl implements ActivityService {
   private final ActivityRepository activityRepository;
   private final UserRepository userRepository;
   private final FileStorage fileStorage;
+  private final AuditLogRepository auditLogRepository;
 
   @Override
   @Transactional
@@ -63,6 +71,8 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     LearningActivity saved = activityRepository.save(activity);
+
+    recordAuditLog(ActionCategory.CREATE, "활동 생성", saved);
 
     return ActivityResponse.from(saved);
   }
@@ -91,8 +101,19 @@ public class ActivityServiceImpl implements ActivityService {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
 
+    Set<String> beforeAddTags = new HashSet<>(activity.getTags());
+
     request.tags().forEach(activity::addTag);
+
+    Set<String> afterAddTags = new HashSet<>(activity.getTags());
+    afterAddTags.removeAll(beforeAddTags);
+
     LearningActivity saved = activityRepository.save(activity);
+
+    recordAuditLog(ActionCategory.UPDATE,
+        "태그추가"
+                 +"\n추가 전 태그: " + beforeAddTags
+                 +"\n추가 태그: " + afterAddTags, saved);
 
     return ActivityResponse.from(saved);
   }
@@ -117,7 +138,24 @@ public class ActivityServiceImpl implements ActivityService {
         () -> new ActivityNotFoundException(activityId)
     );
 
-    activity.removeTag(tag);
+    Set<String> beforeDeleteTags = new HashSet<>(activity.getTags());
+
+    boolean removeTag = activity.removeTag(tag);
+
+    Set<String> afterDeleteTags = new HashSet<>(activity.getTags());
+    List<String> deletedTagList = beforeDeleteTags.stream()
+        .filter(t -> !afterDeleteTags.contains(t))
+        .toList();
+
+    if(removeTag) {
+      recordAuditLog(ActionCategory.UPDATE,
+          "태그 삭제"
+                   +"\n삭제 전 태그: " + beforeDeleteTags
+                   +"\n삭제 된 태그: " + deletedTagList, activity);
+
+    }
+
+
   }
 
   @Override
@@ -179,8 +217,16 @@ public class ActivityServiceImpl implements ActivityService {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
 
+    String beforeChangeTitle = activity.getTitle();
+
     activity.changeTitle(request.title());
     LearningActivity saved = activityRepository.save(activity);
+
+    recordAuditLog(ActionCategory.UPDATE,
+        "활동 제목 변경"
+                 +"변경 전 title: " + beforeChangeTitle
+                 +"변경 후 title: " + saved.getTitle(), saved);
+
     return ActivityResponse.from(saved);
   }
 
@@ -224,7 +270,12 @@ public class ActivityServiceImpl implements ActivityService {
     String attachmentFile = activity.getAttachmentFile();
     fileStorage.deleteFile(attachmentFile);
 
+    recordAuditLog(ActionCategory.DELETE,
+        "활동 삭제", activity);
+
     activityRepository.delete(activity);
+
+
     log.info("활동 삭제 완료 id: {} ", activityId);
   }
 
@@ -251,6 +302,19 @@ public class ActivityServiceImpl implements ActivityService {
     }
     return Optional.of(attachmentFile);
 
+  }
+
+  //Audit 공통 템플릿 헬퍼메드
+  private void recordAuditLog(ActionCategory actionCategory,
+      String description, LearningActivity activity ) {
+
+    String detail = description
+        +"\n활동 title: " + activity.getTitle()
+        +"\n활동 id: " + activity.getId()
+        +"\n활동 category: " + activity.getCategory();
+    Long ownerId = activity.getOwner().getId();
+
+    auditLogRepository.save(new ActivityAuditLog(actionCategory, detail, ownerId));
   }
 
 }
