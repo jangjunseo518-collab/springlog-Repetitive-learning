@@ -1,8 +1,8 @@
 package com.springlog.repetitivelearning.exception;
 
-public class InvalidSortFieldException extends RuntimeException {
+public class InvalidSortFieldException extends BusinessException {
 
   public InvalidSortFieldException(String requestSort) {
-    super("지원하지 않는 정렬 조건입니다.");
+    super(ErrorCode.INVALID_SORT_FIELD, "지원하지 않는 정렬 조건입니다. 입력값: " + requestSort);
   }
 }
