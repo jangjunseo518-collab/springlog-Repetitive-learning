@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
     ErrorCode errorCode = ErrorCode.INVALID_INPUT;
 
     ProblemDetail pd = problem(errorCode.getCode(), errorCode.getHttpStatus(),
-        "필드 검증 필패", "필드 검증에 실패했습니다.");
+        "필드 검증 실패", "필드 검증에 실패했습니다.");
 
     e.getBindingResult().getFieldErrors().forEach( (fieldError) -> {
       boolean contains = fieldError.contains(TypeMismatchException.class);
@@ -71,7 +71,7 @@ public class GlobalExceptionHandler {
     ErrorCode errorCode = e.getErrorCode();
 
     if(errorCode.getHttpStatus().is5xxServerError()) {
-      log.error("[{}] {}", errorCode, e.getMessage(), e);
+      log.error("[{}] {}", errorCode.getCode(), e.getMessage(), e);
     } else  {
       log.warn("[{}] {}", errorCode, e.getMessage());
     }

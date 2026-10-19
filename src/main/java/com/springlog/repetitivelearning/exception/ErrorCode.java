@@ -10,14 +10,14 @@ public enum ErrorCode {
 
   //Activity
   ACTIVITY_NOT_FOUND("A001", HttpStatus.NOT_FOUND, "활동을 찾을 수 없습니다."),
-  VISIBILITY_NOT_PUBLIC("A002", HttpStatus.BAD_REQUEST, "공개 활동 조회로는 공개 활동만 조회가 가능핮니다."),
+  VISIBILITY_NOT_PUBLIC("A002", HttpStatus.BAD_REQUEST, "공개 활동 조회로는 공개 활동만 조회가 가능니다."),
   INVALID_ACTIVITY_INPUT("A003", HttpStatus.BAD_REQUEST, "활동 입력값이 올바르지 않습니다."),
   INVALID_TAG("A004", HttpStatus.BAD_REQUEST, "태그가 올바르지 않습니다."),
 
 
   //Owner 예외코드
   OWNER_NOT_FOUND("U001", HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."),
-  INVALID_USER_INPUT("U002", HttpStatus.BAD_REQUEST, "사용자 입력값이 올바르지 않습니다."),
+  INVALID_OWNER_INPUT("U002", HttpStatus.BAD_REQUEST, "사용자 입력값이 올바르지 않습니다."),
 
 
   // Paging 예외코드
