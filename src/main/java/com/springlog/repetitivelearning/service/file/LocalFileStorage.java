@@ -1,6 +1,7 @@
 package com.springlog.repetitivelearning.service.file;
 
 import com.springlog.repetitivelearning.exception.FileStorageException;
+import com.springlog.repetitivelearning.exception.InvalidFileException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,7 +43,7 @@ public class LocalFileStorage implements FileStorage{
   @Override
   public String saveFile(MultipartFile file) {
     if(file == null || file.isEmpty()){
-      throw new IllegalArgumentException("파일이 비어있습니다.");
+      throw new InvalidFileException("파일이 비어있습니다.");
     }
 
     String originalFileName = StringUtils.cleanPath(
@@ -54,7 +55,7 @@ public class LocalFileStorage implements FileStorage{
         originalFileName.substring(lastDotIndex).toLowerCase() : "";
 
     if(!ALLOWED_EXTENSIONS.contains(extension)){
-      throw new IllegalArgumentException("허용되지 않은 확장자. 확장자: " + extension);
+      throw new InvalidFileException("허용되지 않은 확장자. 확장자: " + extension);
     }
 
     String storedFileName = UUID.randomUUID().toString().replace("-", "") + extension;

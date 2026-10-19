@@ -2,6 +2,9 @@ package com.springlog.repetitivelearning.domain;
 
 import com.springlog.repetitivelearning.domain.type.ActivityCategory;
 import com.springlog.repetitivelearning.domain.type.Visibility;
+import com.springlog.repetitivelearning.exception.InvalidActivityException;
+import com.springlog.repetitivelearning.exception.InvalidOwnerInputException;
+import com.springlog.repetitivelearning.exception.InvalidTagException;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -79,7 +82,7 @@ public class LearningActivity extends BasicEntity {
 
   public void assignOwner(User owner) {
     if(owner == null) {
-      throw new IllegalArgumentException("유저를 입력해 주세요.");
+      throw new InvalidActivityException("유저를 입력해 주세요.");
     }
     this.owner = owner;
   }
@@ -91,19 +94,19 @@ public class LearningActivity extends BasicEntity {
   //========== 제목, 학습 시간 유효성 검증
   private static void validationTitle(String title) {
     if (title == null || title.isBlank()) {
-      throw new IllegalArgumentException("제목은 비워둘 수 없습니다.");
+      throw new InvalidActivityException("제목은 비워둘 수 없습니다.");
     }
   }
 
   private static void validationMinutes(int minutes) {
     if (minutes < 1) {
-      throw new IllegalArgumentException("학습 시간은 1분 이상이여야 합니다.");
+      throw new InvalidActivityException("학습 시간은 1분 이상이여야 합니다.");
     }
   }
 
   private static void validationStudiedOn(LocalDate studiedOn) {
     if(studiedOn != null && studiedOn.isAfter(LocalDate.now())) {
-      throw new IllegalArgumentException("학습한 날짜는 미래일 수 없습니다.");
+      throw new InvalidActivityException("학습한 날짜는 미래일 수 없습니다.");
     }
   }
 
@@ -132,7 +135,7 @@ public class LearningActivity extends BasicEntity {
   //태그 추가
   public void addTag(String tag) {
     if(tag == null || tag.isBlank()) {// 유효성 null,빈값/공백
-      throw new IllegalArgumentException("태그를 입력해 주세요.");
+      throw new InvalidTagException("태그를 입력해 주세요.");
     }
 
     String standardizedTag = tag.trim().toLowerCase(); //정규화
@@ -142,15 +145,15 @@ public class LearningActivity extends BasicEntity {
     }
 
     if(tags.size() >= 10) {// 태그 추가 가능한지 먼저 검증
-      throw new IllegalArgumentException("태그는 10개 까지 추가할 수 있습니다.");
+      throw new InvalidTagException("태그는 10개 까지 추가할 수 있습니다.");
     }
 
     if(!standardizedTag.matches("^[a-zA-Z가-힣0-9@#-]+$")) {//유효성 검증 허용 문자
-      throw new IllegalArgumentException("태그는 한글,영문,숫자,@,#,-만 작성할 수 있습니다.");
+      throw new InvalidTagException("태그는 한글,영문,숫자,@,#,-만 작성할 수 있습니다.");
     }
 
     if(standardizedTag.length() > 20) {// 유효성 검증 글자 수
-      throw new IllegalArgumentException("태그는 20자 까지 입력이 가능합니다.");
+      throw new InvalidTagException("태그는 20자 까지 입력이 가능합니다.");
     }
 
     this.tags.add(standardizedTag);
