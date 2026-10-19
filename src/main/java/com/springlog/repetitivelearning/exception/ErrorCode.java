@@ -10,7 +10,7 @@ public enum ErrorCode {
 
   //Activity
   ACTIVITY_NOT_FOUND("A001", HttpStatus.NOT_FOUND, "활동을 찾을 수 없습니다."),
-  VISIBILITY_NOT_PUBLIC("A002", HttpStatus.BAD_REQUEST, "공개 활동 조회로는 공개 활동만 조회가 가능니다."),
+  VISIBILITY_NOT_PUBLIC("A002", HttpStatus.BAD_REQUEST, "공개 활동 조회로는 공개 활동만 조회가 가능합니다."),
   INVALID_ACTIVITY_INPUT("A003", HttpStatus.BAD_REQUEST, "활동 입력값이 올바르지 않습니다."),
   INVALID_TAG("A004", HttpStatus.BAD_REQUEST, "태그가 올바르지 않습니다."),
 
