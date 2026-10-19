@@ -17,36 +17,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(OwnerNotFoundException.class)
-  public ProblemDetail ownerNotFoundException(OwnerNotFoundException e) {
-    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-        HttpStatus.NOT_FOUND, e.getMessage()
-    );
-
-    problemDetail.setTitle("사용자를 찾지 못함");
-    problemDetail.setProperty("발생 시간", Instant.now().atZone(
-        ZoneId.of("Asia/Seoul")));
-    return problemDetail;
-  }
-
-  @ExceptionHandler(ActivityNotFoundException.class)
-  public ProblemDetail activityNotFoundException(ActivityNotFoundException e) {
-    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-        HttpStatus.NOT_FOUND, e.getMessage()
-    );
-
-    problemDetail.setTitle("활동을 찾지 못함");
-    problemDetail.setProperty("발생 시간",  Instant.now().atZone(ZoneId.of("Asia/Seoul")));
-  return problemDetail;
-  }
-
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ProblemDetail handleValidationException(MethodArgumentNotValidException e) {
     Map<String, String> errors = new HashMap<>();
 
-    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-        HttpStatus.BAD_REQUEST, "필드 검증에 실패했습니다."
-    );
+    ErrorCode errorCode = ErrorCode.INVALID_INPUT;
+
+    ProblemDetail pd = problem(errorCode.getCode(), errorCode.getHttpStatus(),
+        "필드 검증 실패", "필드 검증에 실패했습니다.");
 
     e.getBindingResult().getFieldErrors().forEach( (fieldError) -> {
       boolean contains = fieldError.contains(TypeMismatchException.class);
@@ -64,79 +42,58 @@ public class GlobalExceptionHandler {
         }
       }
     );
-
-    problemDetail.setTitle("필드 검증 실패");
-    problemDetail.setProperty("발생 시간", Instant.now().atZone(
-        ZoneId.of("Asia/Seoul")));
-    problemDetail.setProperty("errors", errors);
-
-    return problemDetail;
+    pd.setProperty("errors", errors);
+    return pd;
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
   public ProblemDetail illegalArgumentException(IllegalArgumentException e) {
-    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-        HttpStatus.BAD_REQUEST, e.getMessage()
-    );
+   ErrorCode errorCode = ErrorCode.INVALID_INPUT;
 
-    problemDetail.setTitle("잘못된 입력");
-    problemDetail.setProperty("발생 시간", Instant.now().atZone(
-        ZoneId.of("Asia/Seoul")
-    ));
-    return problemDetail;
+    ProblemDetail pd = problem(errorCode.getCode(), errorCode.getHttpStatus(),
+        "잘못된 입력값", e.getMessage());
+    return pd;
   }
 
   @ExceptionHandler(Exception.class)
   public ProblemDetail handleException(Exception e) {
     log.error("예상 못한 예외 발생", e);
 
-    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-        HttpStatus.INTERNAL_SERVER_ERROR, "예상 못한 예외"
-    );
-    problemDetail.setTitle("예상 못한 예외");
-    problemDetail.setProperty("발생 시간",  Instant.now().atZone(
-        ZoneId.of("Asia/Seoul")));
+   ErrorCode errorCode = ErrorCode.INTERNAL_ERROR;
+    ProblemDetail pd = problem(errorCode.getCode(), errorCode.getHttpStatus(),
+        "예상치 못한 예외", errorCode.getDefaultMessage());
 
-    return problemDetail;
+    return pd;
   }
 
-  @ExceptionHandler(VisibilityNotPublicException.class)
-  public ProblemDetail visibilityNotPublicException(VisibilityNotPublicException e) {
-    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-        HttpStatus.BAD_REQUEST, e.getMessage()
-    );
+  @ExceptionHandler(BusinessException.class)
+  public ProblemDetail handleBusinessException(BusinessException e) {
+    ErrorCode errorCode = e.getErrorCode();
 
-    problemDetail.setTitle("공개활동 조회로 공개활동 외 활동 조회");
-    problemDetail.setProperty("발생 시간",  Instant.now().atZone(
-        ZoneId.of("Asia/Seoul")
-    ));
+    if(errorCode.getHttpStatus().is5xxServerError()) {
+      log.error("[{}] {}", errorCode.getCode(), e.getMessage(), e);
+    } else  {
+      log.warn("[{}] {}", errorCode, e.getMessage());
+    }
 
-    return problemDetail;
+    ProblemDetail pd = problem(errorCode.getCode(), errorCode.getHttpStatus(),
+        errorCode.getDefaultMessage(), e.getMessage());
+
+    return pd;
   }
 
-  @ExceptionHandler(PageValidationFailureException.class)
-  public ProblemDetail pageValidationFailureException(PageValidationFailureException e) {
-    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-        HttpStatus.BAD_REQUEST, e.getMessage()
+  private ProblemDetail problem(String code, HttpStatus status,
+                               String title, String detail) {
+    ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+        status, detail
     );
 
-    problemDetail.setTitle("page 음수 입력");
-    problemDetail.setProperty("발생 시간",  Instant.now().atZone(
+    pd.setTitle(title);
+    pd.setProperty("code", code);
+    pd.setProperty("발생 시간", Instant.now().atZone(
         ZoneId.of("Asia/Seoul")
     ));
-    return problemDetail;
-  }
-
-  @ExceptionHandler(InvalidSortFieldException.class)
-  public ProblemDetail invalidSortFieldException(InvalidSortFieldException e) {
-    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-        HttpStatus.BAD_REQUEST, e.getMessage()
-    );
-    problemDetail.setTitle("지원하지 않는 정렬 기준");
-    problemDetail.setProperty("발생 시간", Instant.now().atZone(
-        ZoneId.of("Asia/Seoul")
-    ));
-    return problemDetail;
+    return pd;
   }
 
 }

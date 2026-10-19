@@ -1,5 +1,6 @@
 package com.springlog.repetitivelearning.domain;
 
+import com.springlog.repetitivelearning.exception.InvalidOwnerInputException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,12 +35,12 @@ public class User extends BasicEntity {
 
   private static void validateNickName(String nickName) {
     if (nickName == null || nickName.isBlank()) {
-      throw new IllegalArgumentException("닉네임을 입력해 주세요.");
+      throw new InvalidOwnerInputException("닉네임을 입력해 주세요.");
     }
   }
   private static void validateEmail(String email) {
     if (email == null || email.isBlank()) {
-      throw new IllegalArgumentException("이메일을 입력해 주세요.");
+      throw new InvalidOwnerInputException("이메일을 입력해 주세요.");
     }
   }
 }
