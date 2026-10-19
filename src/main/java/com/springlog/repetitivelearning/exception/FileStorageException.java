@@ -1,12 +1,12 @@
 package com.springlog.repetitivelearning.exception;
 
-public class FileStorageException extends RuntimeException {
+public class FileStorageException extends BusinessException {
 
   public FileStorageException(String message) {
-    super(message);
+    super(ErrorCode.FILE_STORAGE_FAILED, message);
   }
 
   public FileStorageException(String message, Throwable cause) {
-    super(message, cause);
+    super(ErrorCode.FILE_STORAGE_FAILED, message, cause);
   }
 }
