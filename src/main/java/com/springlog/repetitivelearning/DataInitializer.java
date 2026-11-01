@@ -12,10 +12,14 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
 
 @Component
 @RequiredArgsConstructor
+@Profile("dev")
 public class DataInitializer implements CommandLineRunner {
 
   private static final String[] INSTRUCTORS = {"김강사", "이강사", "박강사"};
@@ -25,14 +29,16 @@ public class DataInitializer implements CommandLineRunner {
 
   private final ActivityRepository activityRepository;
   private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+
 
   @Override
   public void run(String... args) {
     // 1. 유저 3명 생성 및 저장
     List<User> users = List.of(
-        new User("개발자A", "userA@email.com"),
-        new User("개발자B", "userB@email.com"),
-        new User("개발자C", "userC@email.com")
+        new User("개발자A", "userA@email.com", passwordEncoder.encode("password123")),
+        new User("개발자B", "userB@email.com",passwordEncoder.encode("password456")),
+        new User("개발자C", "userC@email.com",passwordEncoder.encode("password789"))
     );
     userRepository.saveAll(users);
 
