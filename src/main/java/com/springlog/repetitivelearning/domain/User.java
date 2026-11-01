@@ -1,9 +1,12 @@
 package com.springlog.repetitivelearning.domain;
 
+import com.springlog.repetitivelearning.domain.type.Role;
 import com.springlog.repetitivelearning.exception.InvalidOwnerInputException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.HashSet;
@@ -23,6 +26,13 @@ public class User extends BasicEntity {
   @Column(nullable = false,  unique = true)
   private String email;
 
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Role role = Role.USER;
+
+  @Column(length = 100)
+  private String password;
+
   @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<LearningActivity> activities = new HashSet<>();
 
@@ -31,6 +41,11 @@ public class User extends BasicEntity {
     validateEmail(email);
     this.nickName = nickName.trim();
     this.email = email.trim();
+  }
+
+  private User(String nickName, String email, String password) {
+    this(nickName, email);
+    this.password = password;
   }
 
   private static void validateNickName(String nickName) {
