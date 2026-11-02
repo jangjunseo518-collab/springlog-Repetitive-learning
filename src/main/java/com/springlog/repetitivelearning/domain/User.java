@@ -43,7 +43,7 @@ public class User extends BasicEntity {
     this.email = email.trim();
   }
 
-  private User(String nickName, String email, String password) {
+  public User(String nickName, String email, String password) {
     this(nickName, email);
     this.password = password;
   }
