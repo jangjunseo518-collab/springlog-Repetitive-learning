@@ -2,6 +2,7 @@ package com.springlog.repetitivelearning.domain;
 
 import com.springlog.repetitivelearning.domain.type.Role;
 import com.springlog.repetitivelearning.exception.InvalidOwnerInputException;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,21 +31,18 @@ public class User extends BasicEntity {
   @Column(nullable = false)
   private Role role = Role.USER;
 
-  @Column(length = 100)
+  @Column(length = 100, nullable = false)
   private String password;
 
   @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<LearningActivity> activities = new HashSet<>();
 
-  public User(String nickName, String email) {
+  public User(String nickName, String email, String password) {
     validateNickName(nickName);
     validateEmail(email);
+    validatePassword(password);
     this.nickName = nickName.trim();
     this.email = email.trim();
-  }
-
-  public User(String nickName, String email, String password) {
-    this(nickName, email);
     this.password = password;
   }
 
@@ -56,6 +54,12 @@ public class User extends BasicEntity {
   private static void validateEmail(String email) {
     if (email == null || email.isBlank()) {
       throw new InvalidOwnerInputException("이메일을 입력해 주세요.");
+    }
+  }
+
+  private static void validatePassword(String password) {
+    if (password == null || password.isBlank()) {
+      throw new InvalidOwnerInputException("비밀번호를 입력해 주세요.");
     }
   }
 }
