@@ -11,7 +11,7 @@ public record UserResponse(
     Role role
 ) {
 
-  public static  UserResponse form(User user) {
+  public static  UserResponse from(User user) {
     return new UserResponse(
         user.getId(),
         user.getEmail(),

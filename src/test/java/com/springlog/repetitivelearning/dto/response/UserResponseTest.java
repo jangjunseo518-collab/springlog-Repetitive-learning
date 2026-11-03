@@ -7,7 +7,6 @@ import com.springlog.repetitivelearning.domain.type.Role;
 import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -23,7 +22,7 @@ class UserResponseTest {
 
 
     // when
-    UserResponse userResponse = UserResponse.form(user);
+    UserResponse userResponse = UserResponse.from(user);
 
     // then
     assertThat(userResponse.id()).isEqualTo(user.getId());

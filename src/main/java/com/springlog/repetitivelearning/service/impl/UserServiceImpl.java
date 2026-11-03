@@ -33,6 +33,6 @@ public class UserServiceImpl implements UserService {
 
     log.info("[USER] 회원가입 완료 - id: {}, email: {}", saved.getId(), saved.getEmail());
 
-    return UserResponse.form(saved);
+    return UserResponse.from(saved);
   }
 }
