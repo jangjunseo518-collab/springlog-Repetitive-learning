@@ -11,15 +11,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
 
+  @Transactional
   @Override
   public UserResponse register(SignUpRequest request) {
     String email = request.email().trim();
