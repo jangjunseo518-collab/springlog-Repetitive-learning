@@ -18,7 +18,7 @@ public enum ErrorCode {
   //Owner 예외코드
   OWNER_NOT_FOUND("U001", HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."),
   INVALID_OWNER_INPUT("U002", HttpStatus.BAD_REQUEST, "사용자 입력값이 올바르지 않습니다."),
-
+  EMAIL_ALREADY_EXISTS("U003", HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
 
   // Paging 예외코드
   INVALID_SORT_FIELD("P001", HttpStatus.BAD_REQUEST, "정렬 기준이 올바르지 않습니다."),
