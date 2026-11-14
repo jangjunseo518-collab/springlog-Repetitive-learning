@@ -6,6 +6,15 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+        format_sql: true
+        highlight_sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug
 
 sprintlog:
   file-directory: /Users/jangjunseo/Desktop/실무 실습/upload
