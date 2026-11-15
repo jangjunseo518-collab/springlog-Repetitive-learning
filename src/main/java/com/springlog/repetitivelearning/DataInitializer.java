@@ -34,13 +34,20 @@ public class DataInitializer implements CommandLineRunner {
 
   @Override
   public void run(String... args) {
-    // 1. 유저 3명 생성 및 저장
-    List<User> users = List.of(
+    // 1. 유저 3명 생성 및 관리자 1명 저장
+    List<User> users = List.of(     //Role.USER 생성
         new User("개발자A", "userA@email.com", passwordEncoder.encode("password123")),
         new User("개발자B", "userB@email.com",passwordEncoder.encode("password456")),
         new User("개발자C", "userC@email.com",passwordEncoder.encode("password789"))
     );
     userRepository.saveAll(users);
+    //---------Role.ADMIN 생성--------
+    User admin = User.createAdmin(
+        "관리자",
+        "admin@email.com",
+        passwordEncoder.encode("admin12345"));
+
+    userRepository.save(admin); //ADMIN 저장
 
     User[] userArray = users.toArray(new User[0]);
 

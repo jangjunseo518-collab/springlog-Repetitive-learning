@@ -38,12 +38,17 @@ public class User extends BasicEntity {
   private Set<LearningActivity> activities = new HashSet<>();
 
   public User(String nickName, String email, String password) {
+    this(nickName, email, password, Role.USER);
+  }
+
+  private User(String nickName, String email, String password, Role role) {
     validateNickName(nickName);
     validateEmail(email);
     validatePassword(password);
     this.nickName = nickName.trim();
     this.email = email.trim();
     this.password = password;
+    this.role = role;
   }
 
   private static void validateNickName(String nickName) {
@@ -61,5 +66,10 @@ public class User extends BasicEntity {
     if (password == null || password.isBlank()) {
       throw new InvalidOwnerInputException("비밀번호를 입력해 주세요");
     }
+  }
+
+  //ADMIN 생성 헬퍼메서드
+  public static User createAdmin(String nickName, String email, String password) {
+    return new User(nickName, email, password, Role.ADMIN);
   }
 }
