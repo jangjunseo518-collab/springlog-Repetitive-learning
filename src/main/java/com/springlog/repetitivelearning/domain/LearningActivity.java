@@ -80,6 +80,11 @@ public class LearningActivity extends BasicEntity {
     this.bookTitle = bookTitleNormalization(category, bookTitle);
   }
 
+  //소유자 확인
+  public boolean isOwnedBy(Long userId) {
+    return owner != null && owner.getId().equals(userId);
+  }
+
   public void assignOwner(User owner) {
     if(owner == null) {
       throw new InvalidActivityException("유저를 입력해 주세요.");
@@ -220,4 +225,6 @@ public class LearningActivity extends BasicEntity {
     }
     return bookTitle;
   }
+
+
 }
