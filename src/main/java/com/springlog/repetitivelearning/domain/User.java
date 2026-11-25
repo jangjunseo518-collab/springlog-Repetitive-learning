@@ -38,12 +38,22 @@ public class User extends BasicEntity {
   private Set<LearningActivity> activities = new HashSet<>();
 
   public User(String nickName, String email, String password) {
+    this(nickName, email, password, Role.USER);
+  }
+
+  private User(String nickName, String email, String password, Role role) {
     validateNickName(nickName);
     validateEmail(email);
     validatePassword(password);
     this.nickName = nickName.trim();
     this.email = email.trim();
     this.password = password;
+    this.role = role;
+  }
+
+  //ADMIN 생성 메서드
+  public static User createAdmin(String nickName, String email, String password) {
+    return new User(nickName, email, password, Role.ADMIN);
   }
 
   private static void validateNickName(String nickName) {

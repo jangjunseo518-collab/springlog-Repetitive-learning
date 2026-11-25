@@ -20,6 +20,10 @@ public enum ErrorCode {
   INVALID_OWNER_INPUT("U002", HttpStatus.BAD_REQUEST, "사용자 입력값이 올바르지 않습니다."),
   EMAIL_ALREADY_EXISTS("U003", HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
 
+  //Auth 예외코드(인증 인가권)
+  UNAUTHORIZED("AU001", HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
+  FORBIDDEN("AU002", HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+
   // Paging 예외코드
   INVALID_SORT_FIELD("P001", HttpStatus.BAD_REQUEST, "정렬 기준이 올바르지 않습니다."),
   PAGE_VALIDATION_FAILURE("P002", HttpStatus.BAD_REQUEST, "페이지 요청값이 올바르지 않습니다."),
