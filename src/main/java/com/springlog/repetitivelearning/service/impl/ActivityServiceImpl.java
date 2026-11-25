@@ -80,18 +80,27 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public ActivityResponse getActivity(Long activityId) {
+  public ActivityResponse getActivity(Long activityId, LoginUser loginUser) {
 
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId)
     );
 
+    validateCanView(activity, loginUser);
+
     return ActivityResponse.from(activity);
   }
 
   @Override
-  public List<ActivityResponse> getActivitiesByOwnerId(Long ownerId) {
-    List<LearningActivity> activities = activityRepository.findByOwnerId(ownerId);
+  public List<ActivityResponse> getActivitiesByOwnerId(Long ownerId, LoginUser loginUser) {
+
+    List<LearningActivity> activities;
+
+    if(loginUser.isAdmin() || ownerId.equals(loginUser.id())) {
+      activities = activityRepository.findByOwnerId(ownerId);
+    }else{
+      activities = activityRepository.findByOwnerIdAndVisibility(ownerId, Visibility.PUBLIC);
+    }
 
     return activities.stream()
         .map(ActivityResponse::from).toList();
@@ -123,11 +132,13 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public boolean tagExistence(Long activityId, String tag) {
+  public boolean tagExistence(Long activityId, String tag, LoginUser loginUser) {
 
     LearningActivity activity = activityRepository.findById(activityId).orElseThrow(
         () -> new ActivityNotFoundException(activityId)
     );
+
+    validateCanView(activity, loginUser);
 
     boolean hasTag = activity.hasTag(tag);
 
@@ -335,7 +346,7 @@ public class ActivityServiceImpl implements ActivityService {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
 
-    validateCanViewAttachment(activity, loginUser);
+    validateCanView(activity, loginUser);
 
     String attachmentFile = activity.getAttachmentFile();
 
@@ -359,8 +370,8 @@ public class ActivityServiceImpl implements ActivityService {
     auditLogRepository.save(new ActivityAuditLog(actionCategory, detail, ownerId));
   }
 
-  //첨부 파일 접근 검사 헬퍼
-  private void validateCanViewAttachment(LearningActivity activity, LoginUser loginUser) {
+  // 활동 열람 권한 검사 헬퍼 (첨부, 상세 조회, 태그 조회 공통)
+  private void validateCanView(LearningActivity activity, LoginUser loginUser) {
     if(activity.getVisibility() == Visibility.PUBLIC){
       return;
     }

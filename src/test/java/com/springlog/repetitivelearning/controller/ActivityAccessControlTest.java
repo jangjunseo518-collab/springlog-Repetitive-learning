@@ -86,8 +86,9 @@ class ActivityAccessControlTest {
 
   @Test
   void 로그인하면_수정_API가_보안을_통과한다() throws Exception {
-    CustomUserDetails principal =
-        new CustomUserDetails(new User("테스터", "tester@email.com", "password123"));
+    User user = new User("테스터", "tester@email.com", "password123");
+    ReflectionTestUtils.setField(user, "id", 1L);
+    CustomUserDetails principal = new CustomUserDetails(user);
 
     mockMvc.perform(patch("/api/activities/1/public").with(user(principal)))
         .andExpect(status().isOk());
