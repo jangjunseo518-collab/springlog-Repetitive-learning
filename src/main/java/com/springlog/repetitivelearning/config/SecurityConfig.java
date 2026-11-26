@@ -39,7 +39,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/activities", "/api/activities/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/health").permitAll()
             // 감사 로그
-            .requestMatchers(HttpMethod.GET, "/api/audit-logs").hasAllRoles("ADMIN")
+            .requestMatchers(HttpMethod.GET, "/api/audit-logs/**").hasRole("ADMIN")
             // 회원가입
             .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
             // 나머지(생성/수정/삭제 등)는 로그인 필요

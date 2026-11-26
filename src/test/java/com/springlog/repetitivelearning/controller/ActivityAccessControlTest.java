@@ -54,7 +54,7 @@ public class ActivityAccessControlTest {
 
   @Test
   void 비로그인으로_첨부파일_다운_요청하면_401이다() throws Exception {
-    mockMvc.perform(get("/api/activities//1/attachment/download"))
+    mockMvc.perform(get("/api/activities/1/attachment/download"))
         .andExpect(status().isUnauthorized());
   }
 

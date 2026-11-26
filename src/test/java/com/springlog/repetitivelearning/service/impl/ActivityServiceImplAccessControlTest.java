@@ -174,7 +174,7 @@ class ActivityServiceImplAccessControlTest {
         () ->
             activityService.findAttachmentUrl(10L, LoginUser.ANONYMOUS))
         .isInstanceOfSatisfying(BusinessException.class,
-            e -> e.getErrorCode().equals(ErrorCode.UNAUTHORIZED)
+            e -> assertThat(e.getErrorCode().equals(ErrorCode.UNAUTHORIZED))
         );
     verifyNoInteractions(fileStorage);
   }
@@ -238,9 +238,8 @@ class ActivityServiceImplAccessControlTest {
         .thenReturn(Optional.of(activityOwnedBy(1L, Visibility.PUBLIC)));
 
     //when & then
-    Optional<String> attachmentUrl =
-        activityService.findAttachmentUrl(10L, LoginUser.ANONYMOUS);
-    assertThat(attachmentUrl).isNotNull();
+    ActivityResponse activity = activityService.getActivity(10L, LoginUser.ANONYMOUS);
+    assertThat(activity.title()).isEqualTo("제목");
   }
 
   @Test
@@ -253,7 +252,7 @@ class ActivityServiceImplAccessControlTest {
     assertThatThrownBy(
         () -> activityService.getActivity(10L, LoginUser.ANONYMOUS)
     ).isInstanceOfSatisfying(BusinessException.class,
-        e-> e.getErrorCode().equals(ErrorCode.UNAUTHORIZED));
+        e-> assertThat(e.getErrorCode().equals(ErrorCode.UNAUTHORIZED)));
   }
 
   @Test

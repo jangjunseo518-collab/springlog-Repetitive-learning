@@ -13,7 +13,7 @@ class GlobalExceptionHandlerTest {
 
   @Test
   @DisplayName("ForbiddenException 에 응답은 403과 FORBIDDEN코드이다.")
-  void ForbiddenException의_웅답은_403_FORBIDDEN코드이다() {
+  void ForbiddenException의_응답은_403_FORBIDDEN코드이다() {
     // given
     ProblemDetail pd = handler.handleBusinessException(
         new ForbiddenException("권한이 없습니다."));
