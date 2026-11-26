@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.springlog.repetitivelearning.domain.type.Role;
 import com.springlog.repetitivelearning.exception.InvalidOwnerInputException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -47,5 +48,21 @@ class UserTest {
   void 비밀번호가_비어있으면_예외가_발생한다(String password) {
     assertThatThrownBy(() -> new User("tester", "test@test.com", password))
         .isInstanceOf(InvalidOwnerInputException.class);
+  }
+
+  @Test
+  @DisplayName("관리자계정 생성 테스트")
+  void createAdmin으로_생성한_계정의_Role은_ADMIN이다() {
+    // given
+    User admin = User.createAdmin(
+        "관리자",
+        "admin@email.com",
+        "hashPassword"
+    );
+
+    // when & then
+    assertThat(admin.getRole()).isEqualTo(Role.ADMIN);
+
+
   }
 }

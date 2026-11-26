@@ -46,8 +46,7 @@ public record CreateActivityRequest(
     @Min(value = 0, message = "완료율은 0 이상부터 입력 가능합니다.")
     Integer completionRate,
     @Size(max = 100, message = "책 제목은 100자를 넘을 수 없습니다.")
-    String bookTitle,
-    Long ownerId
+    String bookTitle
 ) {
 
 }

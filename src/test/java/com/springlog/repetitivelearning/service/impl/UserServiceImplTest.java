@@ -1,4 +1,4 @@
-package com.springlog.repetitivelearning.servic.impl;
+package com.springlog.repetitivelearning.service.impl;
 
 import static org.mockito.BDDMockito.given;
 
@@ -14,7 +14,6 @@ import com.springlog.repetitivelearning.dto.response.UserResponse;
 import com.springlog.repetitivelearning.exception.BusinessException;
 import com.springlog.repetitivelearning.exception.ErrorCode;
 import com.springlog.repetitivelearning.repository.UserRepository;
-import com.springlog.repetitivelearning.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

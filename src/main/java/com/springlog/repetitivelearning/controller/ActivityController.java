@@ -12,6 +12,8 @@ import com.springlog.repetitivelearning.dto.response.ActivityResponse;
 import com.springlog.repetitivelearning.dto.response.CountCategoryResponse;
 import com.springlog.repetitivelearning.dto.response.PageResponse;
 import com.springlog.repetitivelearning.dto.response.SliceResponse;
+import com.springlog.repetitivelearning.security.CustomUserDetails;
+import com.springlog.repetitivelearning.security.LoginUser;
 import com.springlog.repetitivelearning.service.ActivityDashboard;
 import com.springlog.repetitivelearning.service.ActivityService;
 import jakarta.validation.Valid;
@@ -24,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -48,8 +51,10 @@ public class ActivityController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ActivityResponse> createActivity(
       @RequestPart("data") @Valid CreateActivityRequest request,
-      @RequestPart(value = "file", required = false)MultipartFile file){
-    ActivityResponse activity = activityService.createActivity(request, file);
+      @RequestPart(value = "file", required = false)MultipartFile file,
+      @AuthenticationPrincipal CustomUserDetails principal){
+    ActivityResponse activity = activityService.createActivity(
+        request, file, principal.getUser().getId() );
 
     URI location = URI.create("/api/activities/" + activity.id());
 
@@ -57,14 +62,20 @@ public class ActivityController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ActivityResponse> getActivityById(@PathVariable Long id){
-    ActivityResponse activity = activityService.getActivity(id);
+  public ResponseEntity<ActivityResponse> getActivityById(
+      @PathVariable Long id,
+      @AuthenticationPrincipal CustomUserDetails principal){
+    ActivityResponse activity = activityService.getActivity(
+        id, LoginUser.from(principal));
     return ResponseEntity.status(HttpStatus.OK).body(activity);
   }
 
   @GetMapping
-  public ResponseEntity<List<ActivityResponse>> getActivitiesByOwnerId(@RequestParam Long ownerId) {
-    List<ActivityResponse> activities = activityService.getActivitiesByOwnerId(ownerId);
+  public ResponseEntity<List<ActivityResponse>> getActivitiesByOwnerId(
+      @RequestParam Long ownerId,
+      @AuthenticationPrincipal CustomUserDetails principal) {
+    List<ActivityResponse> activities = activityService.getActivitiesByOwnerId(
+        ownerId, LoginUser.from(principal));
 
     return ResponseEntity.status(HttpStatus.OK).body(activities);
   }
@@ -72,8 +83,11 @@ public class ActivityController {
   //tags
   @PostMapping("/{activityId}/tags")
   public ResponseEntity<ActivityResponse> addTags(
-      @PathVariable Long activityId , @RequestBody @Valid AddTagsRequest request){
-    ActivityResponse activity = activityService.addTags(activityId, request);
+      @PathVariable Long activityId ,
+      @RequestBody @Valid AddTagsRequest request,
+      @AuthenticationPrincipal CustomUserDetails principal){
+    ActivityResponse activity = activityService.addTags(
+        activityId, request, LoginUser.from(principal));
 
     return ResponseEntity.status(HttpStatus.OK).body(activity);
   }
@@ -82,17 +96,21 @@ public class ActivityController {
   @GetMapping("/{activityId}/tags/{tag}")
   public ResponseEntity<Boolean> existenceTag(
       @PathVariable Long activityId ,
-      @PathVariable String tag){
-    boolean existenceTag = activityService.tagExistence(activityId, tag);
+      @PathVariable String tag,
+      @AuthenticationPrincipal CustomUserDetails principal){
+    boolean existenceTag = activityService.tagExistence(
+        activityId, tag, LoginUser.from(principal));
 
     return ResponseEntity.status(HttpStatus.OK).body(existenceTag);
   }
 
   @DeleteMapping("/{activityId}/tags/{tag}")
   public ResponseEntity<Void> deleteTag(
-      @PathVariable Long activityId , @PathVariable String tag
+      @PathVariable Long activityId,
+      @PathVariable String tag,
+      @AuthenticationPrincipal CustomUserDetails principal
   ) {
-    activityService.deleteTag(activityId, tag);
+    activityService.deleteTag(activityId, tag, LoginUser.from(principal));
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
@@ -163,40 +181,64 @@ public class ActivityController {
 
 
   @PatchMapping("/{activityId}/title")
-  public ResponseEntity<ActivityResponse> updateTitle(@PathVariable Long activityId,
-      @RequestBody @Valid ChangeTitleRequest request) {
-    ActivityResponse activityResponse = activityService.changeTitle(activityId, request);
+  public ResponseEntity<ActivityResponse> updateTitle(
+      @PathVariable Long activityId,
+      @RequestBody @Valid ChangeTitleRequest request,
+      @AuthenticationPrincipal CustomUserDetails principal) {
+
+    ActivityResponse activityResponse = activityService.changeTitle(
+        activityId, request, LoginUser.from(principal));
+
     return ResponseEntity.status(HttpStatus.OK).body(activityResponse);
   }
 
   @PostMapping("/{activityId}/minutes")
-  public ResponseEntity<ActivityResponse> updateMinutes(@PathVariable Long activityId,
-      @RequestBody @Valid IncreaseMinutesRequest request) {
-    ActivityResponse activityResponse = activityService.increaseMinutes(activityId, request);
+  public ResponseEntity<ActivityResponse> updateMinutes(
+      @PathVariable Long activityId,
+      @RequestBody @Valid IncreaseMinutesRequest request,
+      @AuthenticationPrincipal CustomUserDetails principal) {
+
+    ActivityResponse activityResponse = activityService.increaseMinutes(
+        activityId, request, LoginUser.from(principal));
+
     return ResponseEntity.status(HttpStatus.OK).body(activityResponse);
   }
 
   @PatchMapping("/{activityId}/public")
-  public ResponseEntity<ActivityResponse> changePublic(@PathVariable Long activityId) {
-    ActivityResponse activityResponse = activityService.changeToPublic(activityId);
+  public ResponseEntity<ActivityResponse> changePublic(
+      @PathVariable Long activityId,
+      @AuthenticationPrincipal CustomUserDetails principal) {
+
+    ActivityResponse activityResponse = activityService.changeToPublic(
+        activityId, LoginUser.from(principal));
     return ResponseEntity.status(HttpStatus.OK).body(activityResponse);
   }
 
   @PatchMapping("/{activityId}/private")
-  public ResponseEntity<ActivityResponse> changePrivate(@PathVariable Long activityId) {
-    ActivityResponse activityResponse = activityService.changeToPrivate(activityId);
+  public ResponseEntity<ActivityResponse> changePrivate(
+      @PathVariable Long activityId,
+      @AuthenticationPrincipal CustomUserDetails principal) {
+
+    ActivityResponse activityResponse = activityService.changeToPrivate(
+        activityId, LoginUser.from(principal));
     return ResponseEntity.status(HttpStatus.OK).body(activityResponse);
   }
 
   @DeleteMapping("/{activityId}")
-  public ResponseEntity<Void> deleteActivity(@PathVariable Long activityId) {
-    activityService.deleteActivity(activityId);
+  public ResponseEntity<Void> deleteActivity(
+      @PathVariable Long activityId,
+      @AuthenticationPrincipal CustomUserDetails principal) {
+
+    activityService.deleteActivity(activityId, LoginUser.from(principal));
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @GetMapping("/{activityId}/attachment")
-  public ResponseEntity<Void> getAttachmentUrl(@PathVariable Long activityId) {
-    Optional<String> fileName = activityService.findAttachmentUrl(activityId);
+  public ResponseEntity<Void> getAttachmentUrl(
+      @PathVariable Long activityId,
+      @AuthenticationPrincipal CustomUserDetails principal) {
+    Optional<String> fileName = activityService.findAttachmentUrl(
+        activityId, LoginUser.from(principal));
 
     if(fileName.isPresent()) {
       return ResponseEntity.status(HttpStatus.FOUND)
@@ -209,8 +251,11 @@ public class ActivityController {
   }
 
   @GetMapping("/{activityId}/attachment/download")
-  public ResponseEntity<Void> getDownloadUrl(@PathVariable Long activityId) {
-    Optional<String> fileName = activityService.findDownloadUrl(activityId);
+  public ResponseEntity<Void> getDownloadUrl(
+      @PathVariable Long activityId,
+      @AuthenticationPrincipal CustomUserDetails principal) {
+    Optional<String> fileName = activityService.findDownloadUrl(
+        activityId, LoginUser.from(principal));
 
     if (fileName.isPresent()) {
       return ResponseEntity.status(HttpStatus.FOUND)
