@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 public interface ActivityRepository extends JpaRepository<LearningActivity, Long> {
 
   List<LearningActivity> findByOwnerId(Long ownerId);
+  List<LearningActivity> findByOwnerIdAndVisibility(Long ownerId, Visibility visibility);
 
   //페이징
   Page<LearningActivity> findByVisibility(Visibility visibility, Pageable pageable);

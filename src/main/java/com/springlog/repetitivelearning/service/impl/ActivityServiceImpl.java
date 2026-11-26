@@ -21,6 +21,7 @@ import com.springlog.repetitivelearning.dto.response.SliceResponse;
 import com.springlog.repetitivelearning.exception.ActivityNotFoundException;
 import com.springlog.repetitivelearning.exception.BusinessException;
 import com.springlog.repetitivelearning.exception.ErrorCode;
+import com.springlog.repetitivelearning.exception.ForbiddenException;
 import com.springlog.repetitivelearning.exception.OwnerNotFoundException;
 import com.springlog.repetitivelearning.repository.ActivityRepository;
 import com.springlog.repetitivelearning.repository.AuditLogRepository;
@@ -79,18 +80,27 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public ActivityResponse getActivity(Long activityId) {
+  public ActivityResponse getActivity(Long activityId, LoginUser loginUser) {
 
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId)
     );
 
+    validateCanView(activity,  loginUser);
+
     return ActivityResponse.from(activity);
   }
 
   @Override
-  public List<ActivityResponse> getActivitiesByOwnerId(Long ownerId) {
-    List<LearningActivity> activities = activityRepository.findByOwnerId(ownerId);
+  public List<ActivityResponse> getActivitiesByOwnerId(Long ownerId, LoginUser loginUser) {
+
+    List<LearningActivity> activities;
+
+    if(loginUser.isAdmin() || ownerId.equals(loginUser.userId())) {
+      activities = activityRepository.findByOwnerId(ownerId);
+    }else{
+      activities = activityRepository.findByOwnerIdAndVisibility(ownerId, Visibility.PUBLIC);
+    }
 
     return activities.stream()
         .map(ActivityResponse::from).toList();
@@ -123,11 +133,13 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public boolean tagExistence(Long activityId, String tag) {
+  public boolean tagExistence(Long activityId, String tag, LoginUser loginUser) {
 
     LearningActivity activity = activityRepository.findById(activityId).orElseThrow(
         () -> new ActivityNotFoundException(activityId)
     );
+
+    validateCanView(activity, loginUser);
 
     boolean hasTag = activity.hasTag(tag);
 
@@ -331,25 +343,23 @@ public class ActivityServiceImpl implements ActivityService {
     return getStoredFileName(activityId, loginUser).map(fileStorage::getDownloadUrl);
   }
 
-  //요청자의 소유 또는 어드민 등급을 검사하는 헬퍼
-  private void validateOwnerOrAdmin(LearningActivity activity, LoginUser loginUser) {
-    if(loginUser.isAdmin() || activity.isOwnedBy(loginUser.userId())){
-      return;
-    }
-    throw new BusinessException(ErrorCode.FORBIDDEN, "해당 활동에 대한 권한이 없습니다.");
-  }
-
-  //첨부파일 접근 권한 검사 헬퍼
-  private void validateCanViewAttachment(LearningActivity activity, LoginUser loginUser){
+  // 활동 열람 권한 검사 헬퍼 (첨부, 상세 조회, 태그 조회 공통)
+  private void validateCanView(LearningActivity activity, LoginUser loginUser) {
     if(activity.getVisibility() == Visibility.PUBLIC){
       return;
     }
-
-    if(loginUser.isAnonymous()){
+    if(loginUser.isAnonymous()) {
       throw new BusinessException(ErrorCode.UNAUTHORIZED);
     }
-
     validateOwnerOrAdmin(activity, loginUser);
+  }
+
+  //권한 검사 메서드 헬퍼
+  private void validateOwnerOrAdmin(LearningActivity activity, LoginUser loginUser) {
+    if (loginUser.isAdmin() || activity.isOwnedBy(loginUser.userId())) {
+      return;
+    }
+    throw new ForbiddenException("해당 활동에 대한 권한이 없습니다.");
   }
 
   //파일명 반환하는 헬퍼
@@ -357,7 +367,7 @@ public class ActivityServiceImpl implements ActivityService {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
 
-    validateCanViewAttachment(activity, loginUser);
+    validateCanView(activity, loginUser);
 
     String attachmentFile = activity.getAttachmentFile();
 

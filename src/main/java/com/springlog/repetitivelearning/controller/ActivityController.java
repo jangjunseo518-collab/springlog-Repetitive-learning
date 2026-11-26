@@ -62,14 +62,20 @@ public class ActivityController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ActivityResponse> getActivityById(@PathVariable Long id){
-    ActivityResponse activity = activityService.getActivity(id);
+  public ResponseEntity<ActivityResponse> getActivityById(
+      @PathVariable Long id,
+      @AuthenticationPrincipal CustomUserDetails principal){
+    ActivityResponse activity = activityService.getActivity(
+        id, LoginUser.from(principal));
     return ResponseEntity.status(HttpStatus.OK).body(activity);
   }
 
   @GetMapping
-  public ResponseEntity<List<ActivityResponse>> getActivitiesByOwnerId(@RequestParam Long ownerId) {
-    List<ActivityResponse> activities = activityService.getActivitiesByOwnerId(ownerId);
+  public ResponseEntity<List<ActivityResponse>> getActivitiesByOwnerId(
+      @RequestParam Long ownerId,
+      @AuthenticationPrincipal CustomUserDetails principal) {
+    List<ActivityResponse> activities = activityService.getActivitiesByOwnerId(
+        ownerId, LoginUser.from(principal));
 
     return ResponseEntity.status(HttpStatus.OK).body(activities);
   }
@@ -90,8 +96,10 @@ public class ActivityController {
   @GetMapping("/{activityId}/tags/{tag}")
   public ResponseEntity<Boolean> existenceTag(
       @PathVariable Long activityId ,
-      @PathVariable String tag){
-    boolean existenceTag = activityService.tagExistence(activityId, tag);
+      @PathVariable String tag,
+      @AuthenticationPrincipal CustomUserDetails principal){
+    boolean existenceTag = activityService.tagExistence(
+        activityId, tag, LoginUser.from(principal));
 
     return ResponseEntity.status(HttpStatus.OK).body(existenceTag);
   }

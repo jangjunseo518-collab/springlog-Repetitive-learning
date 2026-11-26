@@ -18,12 +18,12 @@ public interface ActivityService {
 
   ActivityResponse createActivity(CreateActivityRequest request, MultipartFile file, Long ownerId);
 
-  ActivityResponse getActivity(Long activityId);
+  ActivityResponse getActivity(Long activityId, LoginUser loginUser);
 
-  List<ActivityResponse> getActivitiesByOwnerId(Long ownerId);
+  List<ActivityResponse> getActivitiesByOwnerId(Long ownerId, LoginUser loginUser);
 
   ActivityResponse addTags(Long activityId , AddTagsRequest request, LoginUser loginUser);
-  boolean tagExistence(Long activityId, String tag);
+  boolean tagExistence(Long activityId, String tag, LoginUser loginUser);
   void deleteTag(Long activityId, String tag, LoginUser loginUser);
 
   PageResponse getAllPublicActivitiesByPage(PagingRequest request);
