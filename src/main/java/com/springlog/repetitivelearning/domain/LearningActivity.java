@@ -104,6 +104,11 @@ public class LearningActivity extends BasicEntity {
     }
   }
 
+  //활동 객체의 작성자인지 판단
+  public boolean isOwnedBy(Long userId) {
+    return owner != null && userId.equals(owner.getId());
+  }
+
   private static void validationStudiedOn(LocalDate studiedOn) {
     if(studiedOn != null && studiedOn.isAfter(LocalDate.now())) {
       throw new InvalidActivityException("학습한 날짜는 미래일 수 없습니다.");

@@ -19,10 +19,13 @@ import com.springlog.repetitivelearning.dto.response.ActivityResponse;
 import com.springlog.repetitivelearning.dto.response.PageResponse;
 import com.springlog.repetitivelearning.dto.response.SliceResponse;
 import com.springlog.repetitivelearning.exception.ActivityNotFoundException;
+import com.springlog.repetitivelearning.exception.BusinessException;
+import com.springlog.repetitivelearning.exception.ErrorCode;
 import com.springlog.repetitivelearning.exception.OwnerNotFoundException;
 import com.springlog.repetitivelearning.repository.ActivityRepository;
 import com.springlog.repetitivelearning.repository.AuditLogRepository;
 import com.springlog.repetitivelearning.repository.UserRepository;
+import com.springlog.repetitivelearning.security.LoginUser;
 import com.springlog.repetitivelearning.service.ActivityService;
 import com.springlog.repetitivelearning.service.file.FileStorage;
 import com.springlog.repetitivelearning.service.helper.paging.PagingSetup;
@@ -95,9 +98,12 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   @Transactional
-  public ActivityResponse addTags(Long activityId, AddTagsRequest request) {
+  public ActivityResponse addTags(
+      Long activityId, AddTagsRequest request, LoginUser loginUser) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    validateOwnerOrAdmin(activity, loginUser);
 
     Set<String> beforeAddTags = new HashSet<>(activity.getTags());
 
@@ -130,11 +136,13 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   @Transactional
-  public void deleteTag(Long activityId, String tag) {
+  public void deleteTag(Long activityId, String tag, LoginUser loginUser) {
 
     LearningActivity activity = activityRepository.findById(activityId).orElseThrow(
         () -> new ActivityNotFoundException(activityId)
     );
+
+    validateOwnerOrAdmin(activity, loginUser);
 
     Set<String> beforeDeleteTags = new HashSet<>(activity.getTags());
 
@@ -208,9 +216,12 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   @Transactional
-  public ActivityResponse changeTitle(Long activityId, ChangeTitleRequest request) {
+  public ActivityResponse changeTitle(
+      Long activityId, ChangeTitleRequest request, LoginUser loginUser) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    validateOwnerOrAdmin(activity, loginUser);
 
     String beforeChangeTitle = activity.getTitle();
 
@@ -227,9 +238,12 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   @Transactional
-  public ActivityResponse increaseMinutes(Long activityId, IncreaseMinutesRequest request) {
+  public ActivityResponse increaseMinutes(
+      Long activityId, IncreaseMinutesRequest request, LoginUser loginUser) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    validateOwnerOrAdmin(activity, loginUser);
 
     int beforeIncreaseMinutes = activity.getMinutes();
 
@@ -247,9 +261,11 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   @Transactional
-  public ActivityResponse changeToPublic(Long activityId) {
+  public ActivityResponse changeToPublic(Long activityId, LoginUser loginUser) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    validateOwnerOrAdmin(activity, loginUser);
 
     Visibility beforeChangeToPublic = activity.getVisibility();
 
@@ -266,9 +282,11 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   @Transactional
-  public ActivityResponse changeToPrivate(Long activityId) {
+  public ActivityResponse changeToPrivate(Long activityId, LoginUser loginUser) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    validateOwnerOrAdmin(activity, loginUser);
 
     Visibility beforeChangeToPrivate = activity.getVisibility();
 
@@ -285,9 +303,11 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   @Transactional
-  public void deleteActivity(Long activityId) {
+  public void deleteActivity(Long activityId, LoginUser loginUser) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    validateOwnerOrAdmin(activity, loginUser);
 
     String attachmentFile = activity.getAttachmentFile();
     fileStorage.deleteFile(attachmentFile);
@@ -302,20 +322,42 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public Optional<String> findAttachmentUrl(Long activityId) {
-    return getStoredFileName(activityId).map(fileStorage::getFileUrl);
+  public Optional<String> findAttachmentUrl(Long activityId, LoginUser loginUser) {
+    return getStoredFileName(activityId, loginUser).map(fileStorage::getFileUrl);
   }
 
   @Override
-  public Optional<String> findDownloadUrl(Long activityId) {
-    return getStoredFileName(activityId).map(fileStorage::getDownloadUrl);
+  public Optional<String> findDownloadUrl(Long activityId, LoginUser loginUser) {
+    return getStoredFileName(activityId, loginUser).map(fileStorage::getDownloadUrl);
   }
 
+  //요청자의 소유 또는 어드민 등급을 검사하는 헬퍼
+  private void validateOwnerOrAdmin(LearningActivity activity, LoginUser loginUser) {
+    if(loginUser.isAdmin() || activity.isOwnedBy(loginUser.userId())){
+      return;
+    }
+    throw new BusinessException(ErrorCode.FORBIDDEN, "해당 활동에 대한 권한이 없습니다.");
+  }
+
+  //첨부파일 접근 권한 검사 헬퍼
+  private void validateCanViewAttachment(LearningActivity activity, LoginUser loginUser){
+    if(activity.getVisibility() == Visibility.PUBLIC){
+      return;
+    }
+
+    if(loginUser.isAnonymous()){
+      throw new BusinessException(ErrorCode.UNAUTHORIZED);
+    }
+
+    validateOwnerOrAdmin(activity, loginUser);
+  }
 
   //파일명 반환하는 헬퍼
-  private Optional<String> getStoredFileName(Long activityId) {
+  private Optional<String> getStoredFileName(Long activityId, LoginUser loginUser) {
     LearningActivity activity = activityRepository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    validateCanViewAttachment(activity, loginUser);
 
     String attachmentFile = activity.getAttachmentFile();
 
