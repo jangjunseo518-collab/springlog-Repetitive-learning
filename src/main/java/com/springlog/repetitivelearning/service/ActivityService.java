@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ActivityService {
 
-  ActivityResponse createActivity(CreateActivityRequest request, MultipartFile file);
+  ActivityResponse createActivity(CreateActivityRequest request, MultipartFile file, Long ownerId);
 
   ActivityResponse getActivity(Long activityId);
 

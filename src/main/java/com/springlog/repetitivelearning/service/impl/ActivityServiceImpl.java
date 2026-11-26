@@ -52,8 +52,8 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   @Transactional
   public ActivityResponse createActivity(CreateActivityRequest request,
-      MultipartFile file) {
-    Long ownerId = request.ownerId();
+      MultipartFile file, Long ownerId) {
+
     User owner = userRepository.findById(ownerId).orElseThrow(
         () -> new OwnerNotFoundException(ownerId)
     );

@@ -12,6 +12,7 @@ import com.springlog.repetitivelearning.dto.response.ActivityResponse;
 import com.springlog.repetitivelearning.dto.response.CountCategoryResponse;
 import com.springlog.repetitivelearning.dto.response.PageResponse;
 import com.springlog.repetitivelearning.dto.response.SliceResponse;
+import com.springlog.repetitivelearning.security.CustomUserDetails;
 import com.springlog.repetitivelearning.service.ActivityDashboard;
 import com.springlog.repetitivelearning.service.ActivityService;
 import jakarta.validation.Valid;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -48,8 +50,10 @@ public class ActivityController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ActivityResponse> createActivity(
       @RequestPart("data") @Valid CreateActivityRequest request,
-      @RequestPart(value = "file", required = false)MultipartFile file){
-    ActivityResponse activity = activityService.createActivity(request, file);
+      @RequestPart(value = "file", required = false)MultipartFile file,
+      @AuthenticationPrincipal CustomUserDetails principal){
+    ActivityResponse activity = activityService.createActivity(
+        request, file, principal.getUser().getId() );
 
     URI location = URI.create("/api/activities/" + activity.id());
 
