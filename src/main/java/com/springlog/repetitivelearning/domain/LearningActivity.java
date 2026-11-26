@@ -106,7 +106,7 @@ public class LearningActivity extends BasicEntity {
 
   //활동 객체의 작성자인지 판단
   public boolean isOwnedBy(Long userId) {
-    return owner != null && userId.equals(owner.getId());
+    return userId != null && owner != null && userId.equals(owner.getId());
   }
 
   private static void validationStudiedOn(LocalDate studiedOn) {
